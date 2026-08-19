@@ -17,7 +17,7 @@ In **make.powerapps.com**, select the target environment and open **Solutions**.
 
 Import:
 
-`CLMTables_1_0_0_2.zip`
+`CLMTables_1_0_0_3.zip`
 
 Wait for the import to finish.
 
@@ -45,26 +45,41 @@ During import, map:
 | `clm_GraphDiscovery_adm` | The service-account CLM Graph Discovery connection |
 | `clm_AzureDiscovery_adm` | The service-account CLM Azure Discovery connection |
 
-## 4. Import the app
+## 4. Import the owner resolver
+
+Import:
+
+`CLMOwnerResolver_1_0_0_6.zip`
+
+During import, map `clm_dataverse` to the same Dataverse connection used by the discovery flow.
+
+The resolver runs daily at **03:00 AUS Eastern Standard Time**, one hour after discovery.
+
+## 5. Import the app
 
 Import:
 
 `CLMApp_1_0_0_3.zip`
 
-## 5. Run the first discovery
+## 6. Run the first discovery and owner resolution
 
 1. Open the `CLMDiscoveryFlow` solution.
 2. Open `Discovery-CLMCredentials`.
 3. Turn on the flow.
 4. Run it manually.
 5. Wait for the run to finish.
-6. Open the **Credential Lifecycle** app.
-7. Confirm records appear under **Credentials**.
-8. Review **Coverage Gaps** for permission or connection failures.
+6. Open the `CLMOwnerResolver` solution.
+7. Open `OwnerResolver-CLMCredentials`.
+8. Turn on the flow.
+9. Run it manually.
+10. Open the **Credential Lifecycle** app.
+11. Confirm records appear under **Credentials**.
+12. Confirm resolvable Owner Tags populated **Owner User**.
+13. Review **Coverage Gaps** and unresolved ownership events.
 
-The flow then runs daily at **02:00 AUS Eastern Standard Time**.
+Discovery runs daily at **02:00** and owner resolution runs at **03:00**, using AUS Eastern Standard Time.
 
-## 6. Assign access
+## 7. Assign access
 
 Assign users one of the roles included in `CLMTables`:
 
@@ -74,11 +89,9 @@ Assign users one of the roles included in `CLMTables`:
 | `CLM Owner` | Credential owners |
 | `CLM Platform Ops` | Administrators and operators |
 
-## 7. Review ownership
+## 8. Configure ownership
 
-Discovery captures an owner hint, but this release does not automatically convert that hint into a Dataverse user or team.
-
-Follow [Owner resolution](OWNER_RESOLUTION.md) before relying on ownership fields or owner-based notifications.
+Follow [Owner resolution](OWNER_RESOLUTION.md) to configure fallback rules and large-estate ownership.
 
 ## Quick troubleshooting
 
@@ -88,5 +101,6 @@ Follow [Owner resolution](OWNER_RESOLUTION.md) before relying on ownership field
 | Graph actions return 403 | Graph delegated permissions and admin consent |
 | Azure actions return 403 | Service-account Azure RBAC assignments |
 | Flow import asks for missing connections | Create both custom-connector connections first |
-| Credentials have an Owner Tag but no Owner User | This is expected; see `OWNER_RESOLUTION.md` |
+| Credentials have an Owner Tag but no Owner User | User is disabled/missing, the tag is not an email, or no fallback rule matched |
+| Randomly named apps remain unassigned | Use Entra owners or an immutable-ID mapping process; see `OWNER_RESOLUTION.md` |
 | No records appear | Flow run history, then Coverage Gaps |

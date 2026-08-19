@@ -4,22 +4,23 @@ This document describes the four modular solutions included in `packages/`.
 
 ## Decision
 
-CLM is moving from the monolithic `CredentialLifecycleManager` solution to four modular solutions:
+CLM uses five modular solutions:
 
 ```text
 CLMTables
    ├── CLMDiscoveryFlow
+   ├── CLMOwnerResolver
    └── CLMApp
 
 clmPlatformOps
    └── CLMDiscoveryFlow
 ```
 
-`CLMTables` is the data foundation. `clmPlatformOps` supplies the discovery connectors. `CLMDiscoveryFlow` performs discovery and writes to the tables. `CLMApp` provides the operator interface.
+`CLMTables` is the data foundation. `clmPlatformOps` supplies the discovery connectors. `CLMDiscoveryFlow` performs discovery. `CLMOwnerResolver` assigns users or teams. `CLMApp` provides the operator interface.
 
 ## Reviewed solution inventory
 
-### CLMTables 1.0.0.2
+### CLMTables 1.0.0.3
 
 **Root components:** 19
 
@@ -69,6 +70,14 @@ The flow runs daily at 02:00 AUS Eastern Standard Time and has four table depend
 
 The custom connectors are owned only by `clmPlatformOps 1.0.0.2`.
 
+### CLMOwnerResolver 1.0.0.6
+
+**Root components:** 1
+
+- `OwnerResolver-CLMCredentials`
+
+The resolver runs daily at 03:00 AUS Eastern Standard Time and uses Dataverse only. It resolves Owner Tags to active users, applies priority-ordered Owner Rules, assigns either Owner User or Owner Team, and records audit events.
+
 ### CLMApp 1.0.0.3
 
 **Root components:** 5
@@ -90,6 +99,7 @@ Normal deployment uses solution import only. Follow [`INSTALL.md`](INSTALL.md) f
 | Gap | Impact | Required change |
 |---|---|---|
 | Connector OAuth settings use neutral placeholders | Connections fail until customer values are entered | Set client ID, tenant ID, secret, and redirect URIs during installation |
-| Owner Tag is not resolved to a Dataverse user or team | Ownership and owner-based notification are manual | Add a solution-aware owner-resolver flow |
+| Enterprise-application Owner Tag is not populated | Enterprise-application credentials require rule or manual assignment | Add service-principal owner discovery |
+| Random application names do not support reliable pattern rules | Large estates retain unresolved ownership | Add immutable App ID/Object ID mappings |
 | Discovery flow does not write `clm_discoveryrun` | No run-level audit record despite the table and variable | Add create/update actions around each flow execution |
 | Checked-in source predates the current packages | Scripts and JSON may recreate older architecture | Refresh source from the release packages before further development |

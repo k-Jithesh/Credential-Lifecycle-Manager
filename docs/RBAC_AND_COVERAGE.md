@@ -54,6 +54,9 @@ The Dataverse connection owner requires read/write access to:
 - `clm_sourceenvironment`
 - `clm_coveragegap`
 - `clm_renewalevent`
+- `clm_ownerrule`
+
+It also requires read access to Dataverse users and teams so the owner resolver can populate lookup fields.
 
 The current flow does not write `clm_discoveryrun`, although that table is part of `CLMTables`.
 

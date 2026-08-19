@@ -10,12 +10,13 @@ Follow the short guide:
 
 **[Install CLM in a Power Platform environment](docs/INSTALL.md)**
 
-The install uses four solutions:
+The install uses five solutions:
 
 1. `CLMTables`
 2. `clmPlatformOps`
 3. `CLMDiscoveryFlow`
-4. `CLMApp`
+4. `CLMOwnerResolver`
+5. `CLMApp`
 
 The four deployment packages are in `packages/`.
 
@@ -26,6 +27,7 @@ The four deployment packages are in `packages/`.
 | `CLMTables` | Dataverse tables and choices |
 | `clmPlatformOps` | Graph and Azure custom connectors |
 | `CLMDiscoveryFlow` | Daily credential discovery |
+| `CLMOwnerResolver` | Daily owner user/team assignment |
 | `CLMApp` | Model-driven operations app |
 
 ## More information
