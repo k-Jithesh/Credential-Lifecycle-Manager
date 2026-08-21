@@ -8,13 +8,14 @@ CLM uses modular Power Platform solutions and an Azure Action Group-style notifi
 CLMTables 1.1.0.7
    ├── CLMDiscoveryFlow
    ├── CLMNotifications 1.0.0.0
+   ├── CLMNotificationDispatchers 1.0.0.0 (optional)
    └── CLMApp
 
 clmPlatformOps
    └── CLMDiscoveryFlow
 ```
 
-`CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. `CLMApp` provides the operator interface.
+`CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. The optional `CLMNotificationDispatchers` solution sends queued email and Teams messages where DLP permits. `CLMApp` provides the operator interface.
 
 ## Data foundation: CLMTables 1.1.0.7
 
@@ -53,6 +54,8 @@ A Notification Group can fan out to multiple receivers, allowing a shared mailbo
 
 After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated Notification Delivery record per receiver and channel. Delivery records preserve the credential, group, receiver, channel, queue state, time, and diagnostic details.
 
+`Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently every five minutes. Each processes up to 100 oldest Pending or Retrying records for its channel, sends through its dedicated connector, and updates the delivery record to Sent or Failed.
+
 ## Solution inventory and readiness
 
 | Solution | Version or state | Responsibility |
@@ -61,10 +64,11 @@ After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated No
 | `clmPlatformOps` | 1.0.0.2 packaged | Graph and Azure custom connectors |
 | `CLMDiscoveryFlow` | 1.0.0.26 packaged | Daily credential discovery |
 | `CLMNotifications` | 1.0.0.0 packaged | Group resolution, deduplicated queueing, and delivery audit |
+| `CLMNotificationDispatchers` | 1.0.0.0 packaged | Optional email and Teams delivery in DLP-compatible environments |
 | `CLMApp` | 1.0.0.5 packaged | Model-driven operations interface with notification administration and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_7.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_7.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
@@ -72,7 +76,7 @@ See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
 | Gap | Impact |
 |---|---|
-| Environment DLP blocks Outlook and Teams with Dataverse | The packaged flow creates Pending/Retrying delivery records; an approved transport broker must dispatch them |
+| Environment DLP blocks Outlook or Teams with Dataverse | Keep the affected dispatcher disabled and use an approved external broker |
 | Older environments may retain legacy owner fields | Upgrade cleanup must remove or retire fields outside the vanilla model |
 | Enterprise-application owner discovery may be incomplete | Some records will depend on mappings, tags, rules, or triage |
 | Discovery does not yet provide a complete run-level audit | Operational review still depends on flow history and existing event records |

@@ -12,6 +12,7 @@ The deployment packages are:
 - `clmPlatformOps_1_0_0_2.zip`
 - `CLMDiscoveryFlow_1_0_0_26.zip`
 - `CLMNotifications_1_0_0_0.zip`
+- `CLMNotificationDispatchers_1_0_0_0.zip` (optional; requires compatible DLP)
 - `CLMApp_1_0_0_5.zip`
 
 ## Before you start
@@ -79,7 +80,28 @@ Enable these flows:
 | `Resolve-CLMNotificationGroups` | Daily at 03:00 Australian Eastern time | Assigns unassigned credentials using mappings, Owner Tag, rules, then default triage |
 | `Queue-CLMCredentialNotifications` | Daily at 07:00 Australian Eastern time | Creates deduplicated Pending or Retrying Notification Delivery records |
 
-The queue flow is intentionally Dataverse-only. It does not send email or Teams messages until an approved transport broker is connected.
+The queue flow is intentionally Dataverse-only.
+
+### 6. Import notification dispatchers where permitted
+
+Import `CLMNotificationDispatchers_1_0_0_0.zip` only into a CLM environment whose DLP policy permits Dataverse with Office 365 Outlook and Microsoft Teams. The dispatchers use the current environment's CLM tables; installing them in a separate environment without the same CLM data will not process the source queue.
+
+During import, map:
+
+| Connection reference | Select |
+|---|---|
+| `clm_sharedcommondataserviceforapps_dispatchers` | A Dataverse connection in the CLM environment |
+| `clm_sharedoffice365_clmnotifications` | The mailbox connection that sends CLM email |
+| `clm_sharedteams_clmnotifications` | The Teams connection that posts CLM channel messages |
+
+Enable the flows independently:
+
+| Flow | Default schedule | Purpose |
+|---|---|---|
+| `Dispatch-CLMEmailNotifications` | Every 5 minutes | Sends Pending/Retrying Email deliveries and records Sent or Failed |
+| `Dispatch-CLMTeamsNotifications` | Every 5 minutes | Posts Pending/Retrying Teams deliveries and records Sent or Failed |
+
+Do not enable a dispatcher until its connection is owned by an approved service account. Each run processes up to 100 oldest matching records sequentially.
 
 ## Initial configuration
 
@@ -91,8 +113,9 @@ The queue flow is intentionally Dataverse-only. It does not send email or Teams 
 6. Turn on and run `Discovery-CLMCredentials`.
 7. Run `Resolve-CLMNotificationGroups`, then review assigned credentials.
 8. Run `Queue-CLMCredentialNotifications`, then review Notification Delivery records.
+9. In a DLP-compatible environment, enable the required dispatcher and confirm delivery rows move from Pending to Sent.
 
-See [Notification responsibility resolution](OWNER_RESOLUTION.md) for operating guidance.
+When a recipient starts renewal, set the Credential to **In Renewal**, add its **Renewal Ticket URL**, and set **Suppressed Until** to the next follow-up date. See [Notification responsibility resolution](OWNER_RESOLUTION.md) for reminder-bucket and suppression behavior.
 
 ## Access
 
@@ -111,8 +134,9 @@ Assign users an included role appropriate to their duties:
 | Connector sign-in fails | Client ID, client secret, tenant ID, and redirect URI |
 | Graph actions return 403 | Graph permissions and admin consent |
 | Azure actions return 403 | Service-account Azure RBAC assignments |
-| Notification flow import asks for a missing connection | Map the packaged Dataverse connection reference |
+| Notification flow import asks for a missing connection | Map the packaged connection references |
 | Credential has no Notification Group | Check immutable mapping, Owner Tag receiver match, rules, then default triage |
 | No delivery records appear | Queue flow status, credential expiry window, receiver activation, and flow run history |
-| Delivery records remain Pending | Configure an approved delivery broker; the packaged queue does not bypass DLP |
+| Delivery records remain Pending | Confirm the matching dispatcher is enabled, its connections are valid, and DLP permits the connector combination |
+| Delivery record becomes Failed | Review Error Detail, correct the receiver or connection, then change the row to Retrying |
 | No credentials appear | Discovery flow run history, then Coverage Gaps |
