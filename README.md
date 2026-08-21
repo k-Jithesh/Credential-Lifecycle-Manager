@@ -26,7 +26,7 @@ Use Power Platform solution import for deployment. See:
 
 The data foundation is `CLMTables 1.1.0.7`. `CLMNotifications 1.0.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records.
 
-The packaged notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. Email and Teams transport requires an approved delivery broker or a policy change that permits those connectors with Dataverse.
+The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse.
 
 ## Solution responsibilities
 
@@ -36,6 +36,7 @@ The packaged notification flows use only the Dataverse connector so they remain 
 | `clmPlatformOps 1.0.0.2` | Graph and Azure custom connectors | Packaged |
 | `CLMDiscoveryFlow 1.0.0.26` | Daily credential discovery | Packaged |
 | `CLMNotifications 1.0.0.0` | Notification-group resolution and delivery queue audit | Packaged |
+| `CLMNotificationDispatchers 1.0.0.0` | Optional email and Teams delivery from queued records | Packaged |
 | `CLMApp 1.0.0.5` | Model-driven operations app with notification administration and audit pages | Packaged |
 
 ## More information

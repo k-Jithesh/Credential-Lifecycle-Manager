@@ -88,10 +88,28 @@ Review the triage queue regularly and replace repeated fallback assignments with
 - What provider response or error was recorded?
 - Does a retry or receiver correction remain necessary?
 
-One notification event can produce multiple delivery records when a group has multiple receivers. Records remain Pending or Retrying until an approved transport broker processes them.
+One notification event can produce multiple delivery records when a group has multiple receivers. The optional `CLMNotificationDispatchers` solution provides separate email and Teams flows that process Pending or Retrying records, then record Sent or Failed with attempt details.
+
+The daily queue creates one delivery per receiver and channel when a credential first enters each reminder bucket: 90 days, 60 days, 30 days, 14 days, 7 days, and Overdue. Deduplication prevents daily repeats inside a bucket. Overdue is a single bucket, so it produces one notification rather than a daily overdue reminder.
+
+Dispatch uses at-least-once delivery semantics. If a provider accepts a message but the subsequent Dataverse status update fails, an operator retry can deliver the message again. Review provider history before retrying ambiguous failures. A receiver deactivated after queueing is not contacted; its delivery is marked Skipped.
+
+## Record renewal action and pause reminders
+
+When remediation starts:
+
+1. Set Credential **Status** to **In Renewal**.
+2. Populate **Renewal Ticket URL** with the tracking item.
+3. Set **Suppressed Until** to the next date on which CLM should remind the group if renewal is still incomplete.
+
+The queue ignores the credential while `Suppressed Until` is in the future. When that time passes, CLM evaluates the credential again and queues the reminder for its current bucket; it does not backfill every bucket crossed during suppression.
+
+Completing the work in the source system should result in discovery recording the new expiry date. Once **Days Until Expiry** is greater than 90, the credential naturally leaves the notification window. Set **Decommissioned** only when the credential is permanently retired.
+
+The current queue permanently excludes only **Decommissioned**. **In Renewal** and **Renewed** are tracking states and do not stop notifications by themselves. `Suppressed Until` is therefore the temporary acknowledgement and pause control. CLM does not currently send a separate “action taken” confirmation message; operators review Status, Renewal Ticket URL, Suppressed Until, and Notification Delivery history in the app.
 
 ## Current limitations
 
-- The current environment DLP policy blocks Outlook and Teams connectors in a Dataverse flow. The packaged solution therefore resolves and queues notifications but does not dispatch them.
-- Outbound email and Teams delivery requires an approved broker or a DLP policy change.
+- Environments that block Outlook or Teams with Dataverse can use resolution and queueing but must not enable the corresponding dispatcher.
+- The dispatcher flows require the CLM queue data in the same DLP-compatible environment. Cross-environment delivery requires an approved external broker.
 - Older environments may still contain legacy owner columns or rules and require environment-specific cleanup; those components are not part of the desired vanilla model.
