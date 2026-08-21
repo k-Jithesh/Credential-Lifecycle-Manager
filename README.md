@@ -24,7 +24,7 @@ Use Power Platform solution import for deployment. See:
 
 **[Install CLM](docs/INSTALL.md)**
 
-The data foundation is `CLMTables 1.1.0.6`. `CLMNotifications 1.0.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records.
+The data foundation is `CLMTables 1.1.0.7`. `CLMNotifications 1.0.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records.
 
 The packaged notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. Email and Teams transport requires an approved delivery broker or a policy change that permits those connectors with Dataverse.
 
@@ -32,7 +32,7 @@ The packaged notification flows use only the Dataverse connector so they remain 
 
 | Solution | Purpose | Readiness |
 |---|---|---|
-| `CLMTables 1.1.0.6` | Dataverse tables, choices, relationships, and roles | Packaged |
+| `CLMTables 1.1.0.7` | Dataverse tables, choices, relationships, and roles | Packaged |
 | `clmPlatformOps 1.0.0.2` | Graph and Azure custom connectors | Packaged |
 | `CLMDiscoveryFlow 1.0.0.26` | Daily credential discovery | Packaged |
 | `CLMNotifications 1.0.0.0` | Notification-group resolution and delivery queue audit | Packaged |

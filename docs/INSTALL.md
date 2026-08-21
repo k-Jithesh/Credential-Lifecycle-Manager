@@ -4,11 +4,11 @@ CLM is installed through Power Platform solution import. PowerShell is not requi
 
 ## Readiness
 
-The notification data model is packaged as `CLMTables_1_1_0_6.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_0_0_0.zip`.
+The notification data model is packaged as `CLMTables_1_1_0_7.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_0_0_0.zip`.
 
 The deployment packages are:
 
-- `CLMTables_1_1_0_6.zip`
+- `CLMTables_1_1_0_7.zip`
 - `clmPlatformOps_1_0_0_2.zip`
 - `CLMDiscoveryFlow_1_0_0_26.zip`
 - `CLMNotifications_1_0_0_0.zip`
@@ -29,7 +29,9 @@ You need:
 
 ### 1. Import the tables
 
-Import `CLMTables_1_1_0_6.zip`.
+Import `CLMTables_1_1_0_7.zip`.
+
+When upgrading from `CLMTables 1.1.0.6`, review and re-save Notification Group **Digest Enabled** and **Enabled**, Notification Receiver **Active**, and Owner Mapping **Active**. Version 1.1.0.7 corrects their inverted Boolean labels to `0 = False` and `1 = True`, but importing metadata does not rewrite existing stored values.
 
 The vanilla model includes:
 
