@@ -1,64 +1,97 @@
-# Owner resolution
+# Notification responsibility resolution
 
-## Current behaviour
+CLM routes credential notifications through Azure Action Group-style Notification Groups. A group is the stable operational destination; its receivers define the actual delivery endpoints.
 
-`CLMDiscoveryFlow 1.0.0.26` captures an owner hint in `clm_credential.clm_ownertag`.
+The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.0.0.0`.
 
-| Credential source | Owner Tag value |
+## Ownership versus notification responsibility
+
+Dataverse **Owning User** and **Owning Team** are standard platform fields used for security, access, and record ownership. They do not identify who must receive credential-renewal notifications.
+
+Notification responsibility is represented by the Credential **Notification Group** lookup. Credential retains **Owner Tag** as discovery input, but the vanilla model has no custom Owner User, Owner Team, Owner Source, or Owner Locked columns.
+
+## Data model
+
+| Table | Purpose |
 |---|---|
-| Entra application secret or certificate | First application owner's UPN or email |
-| Key Vault secret | First available vault tag: `Owner`, `owner`, or `OwnerEmail` |
-| Enterprise application certificate | Not currently populated |
+| Notification Group (`clm_notificationgroup`) | Named operational destination assigned to credentials |
+| Notification Receiver (`clm_notificationreceiver`) | One delivery endpoint belonging to a Notification Group |
+| Owner Mapping (`clm_ownermapping`) | Immutable credential or application identifier mapped to a Notification Group |
+| Notification Delivery (`clm_notificationdelivery`) | Audit record for an attempted notification to a receiver |
+| Owner Rule (`clm_ownerrule`) | Priority-ordered fallback that targets a Notification Group |
 
-The flow does **not** populate:
+A Notification Receiver can represent:
 
-- `Owner User` (`clm_owneruser`)
-- `Owner Team` (`clm_ownerteam`)
-- `Owner Source` (`clm_ownersource`)
+- An individual email address
+- A shared mailbox
+- A distribution group
+- A Microsoft 365 group
+- A Teams channel
 
-The four release solutions do not include an owner-resolver flow. The `Owner Rules` table is present for future automation, but the current discovery flow does not evaluate it.
+Where applicable, set the optional Dataverse User or Contact lookup to the correct record. These lookups improve traceability; the receiver address or channel remains the delivery endpoint.
 
-## What a new installer should do
+## Resolution precedence
 
-After the first discovery run:
+`Resolve-CLMNotificationGroups` assigns exactly one active Notification Group using this order:
 
-1. Open the **Credential Lifecycle** app.
-2. Open **Credentials**.
-3. Review the **Owner Tag** value.
-4. Set **Owner User** or **Owner Team**.
-5. Set **Owner Source** to `Manual`.
-6. Set **Owner Locked** to `Yes`.
-7. Save.
+1. **Immutable mapping** — an active Owner Mapping matches a stable credential, application, or source object identifier.
+2. **Owner Tag** — the retained discovery tag matches an active receiver email address.
+3. **Owner Rule** — the first active, priority-ordered matching rule supplies a Notification Group.
+4. **Default triage** — the configured triage group receives anything still unresolved.
 
-`Owner Locked` records the intent that future owner automation must not replace the manual assignment. The current discovery flow only refreshes the Owner Tag and does not overwrite the Owner User or Owner Team lookups.
+Immutable mappings take precedence even if display names or personnel change. Rules should be used only for stable patterns, not as a substitute for mappings.
 
-## Owner Source values
+## Operator setup
 
-| Value | Meaning |
-|---|---|
-| `Tag` | Derived from an Azure resource tag |
-| `AADOwner` | Derived from the first Entra application owner |
-| `Rule` | Derived from an Owner Rule |
-| `Manual` | Set by an operator |
+### Create groups and receivers
 
-## Recommended owner data
+1. Create a Notification Group for each accountable operational function, such as Platform Operations or Application Support.
+2. Add at least one active Notification Receiver to each group.
+3. Select the receiver type and enter the monitored email address or Teams channel destination.
+4. Optionally associate the correct Dataverse User or Contact.
+5. Keep group membership current when operational responsibilities change.
 
-For better discovery results:
+Prefer shared, monitored destinations over personal addresses for durable coverage.
 
-- Assign at least one owner to every Entra app registration.
-- Add an `Owner` or `OwnerEmail` tag to each Key Vault.
-- Use a monitored team mailbox or distribution address when ownership belongs to a team.
+### Map credentials and applications
 
-## Automation gap
+Create an Owner Mapping when responsibility is known and must survive renames. Use the most stable available identifiers, such as credential source identity, Entra App ID, or source Object ID, and select the responsible Notification Group.
 
-Automated owner resolution requires a future solution-aware flow that:
+For bulk onboarding:
 
-1. Finds credentials with an Owner Tag and no locked owner.
-2. Matches the tag to an enabled Dataverse user.
-3. Falls back to active `clm_ownerrule` records.
-4. Sets Owner User or Owner Team.
-5. Sets Owner Source to `AADOwner`, `Tag`, or `Rule`.
-6. Marks unresolved credentials as orphaned.
-7. Never replaces a record where Owner Locked is `Yes`.
+1. Export application and credential identifiers, current Entra owners, Owner Tags, and expiry dates.
+2. Obtain responsibility confirmation from the relevant operational teams.
+3. Create mappings for confirmed assignments.
+4. Improve Entra ownership where it is missing or stale.
+5. Leave unresolved records for the default triage group rather than creating fragile name rules.
 
-Until that flow is added and tested, documentation and demos must describe owner resolution as manual.
+### Configure rules
+
+Create active Owner Rules with explicit priorities and a target Notification Group. Lower priority numbers are evaluated first. Use scopes such as environment, resource group, vault name, display name, or Owner Tag only when the pattern is stable.
+
+Do not target a Dataverse user or team. The desired rule output is a Notification Group.
+
+### Configure default triage
+
+Create a dedicated, active Notification Group with a monitored receiver for unresolved responsibility. Mark it as the single default triage group.
+
+Review the triage queue regularly and replace repeated fallback assignments with immutable mappings or corrected Entra ownership.
+
+## Interpret delivery records
+
+`Queue-CLMCredentialNotifications` creates one deduplicated Notification Delivery queue record per credential, reminder bucket, receiver, and channel. Operators should use it to answer:
+
+- Which credential and Notification Group generated the notification?
+- Which receiver and channel were targeted?
+- Was delivery attempted, successful, failed, or skipped?
+- When was the attempt made?
+- What provider response or error was recorded?
+- Does a retry or receiver correction remain necessary?
+
+One notification event can produce multiple delivery records when a group has multiple receivers. Records remain Pending or Retrying until an approved transport broker processes them.
+
+## Current limitations
+
+- The current environment DLP policy blocks Outlook and Teams connectors in a Dataverse flow. The packaged solution therefore resolves and queues notifications but does not dispatch them.
+- Outbound email and Teams delivery requires an approved broker or a DLP policy change.
+- Older environments may still contain legacy owner columns or rules and require environment-specific cleanup; those components are not part of the desired vanilla model.
