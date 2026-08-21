@@ -1,140 +1,97 @@
-# Owner resolution
+# Notification responsibility resolution
 
-`CLMOwnerResolver 1.0.0.6` assigns the `Owner User` or `Owner Team` lookup on discovered credentials.
+CLM routes credential notifications through Azure Action Group-style Notification Groups. A group is the stable operational destination; its receivers define the actual delivery endpoints.
 
-It runs daily at **03:00 AUS Eastern Standard Time**, after the 02:00 discovery flow.
+The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.0.0.0`.
 
-## Assignment order
+## Ownership versus notification responsibility
 
-For each credential that is not decommissioned, not named `SYSTEM`, and not owner-locked:
+Dataverse **Owning User** and **Owning Team** are standard platform fields used for security, access, and record ownership. They do not identify who must receive credential-renewal notifications.
 
-1. Read `Owner Tag`.
-2. If it looks like an email, find an active Dataverse user by email or domain name.
-3. Assign that user.
-4. If the tag cannot resolve, evaluate active Owner Rules in ascending priority order.
-5. Apply the first matching rule.
-6. Record the assignment or failure in Renewal Events.
+Notification responsibility is represented by the Credential **Notification Group** lookup. Credential retains **Owner Tag** as discovery input, but the vanilla model has no custom Owner User, Owner Team, Owner Source, or Owner Locked columns.
 
-Manual assignments with **Owner Locked = Yes** are never changed.
+## Data model
 
-## Owner source
-
-| Source | When used |
+| Table | Purpose |
 |---|---|
-| `AADOwner` | An Entra app-registration owner email resolves to a Dataverse user |
-| `Tag` | A resource Owner Tag resolves to a Dataverse user |
-| `Rule` | A fallback Owner Rule assigns a user or team |
-| `Manual` | An operator sets and locks the owner |
+| Notification Group (`clm_notificationgroup`) | Named operational destination assigned to credentials |
+| Notification Receiver (`clm_notificationreceiver`) | One delivery endpoint belonging to a Notification Group |
+| Owner Mapping (`clm_ownermapping`) | Immutable credential or application identifier mapped to a Notification Group |
+| Notification Delivery (`clm_notificationdelivery`) | Audit record for an attempted notification to a receiver |
+| Owner Rule (`clm_ownerrule`) | Priority-ordered fallback that targets a Notification Group |
 
-If a previously tag-derived owner becomes invalid, the resolver clears the stale owner before evaluating fallback rules.
+A Notification Receiver can represent:
 
-## Owner Rules
+- An individual email address
+- A shared mailbox
+- A distribution group
+- A Microsoft 365 group
+- A Teams channel
 
-Create rules in the **Credential Lifecycle** app under **Owner Rules**.
+Where applicable, set the optional Dataverse User or Contact lookup to the correct record. These lookups improve traceability; the receiver address or channel remains the delivery endpoint.
 
-| Field | Use |
-|---|---|
-| Rule Name | Human-readable purpose |
-| Priority | Lower number wins |
-| Match Scope | Field to inspect |
-| Match Pattern | Case-insensitive substring; empty means catch-all |
-| Assign To User | User assigned when the rule matches |
-| Assign To Team | Team assigned when no user is configured |
-| Active | Whether the resolver evaluates the rule |
+## Resolution precedence
 
-Supported scopes:
+`Resolve-CLMNotificationGroups` assigns exactly one active Notification Group using this order:
 
-- Display Name
-- Owner Tag
-- Environment
-- Key Vault Name
-- Resource Group
+1. **Immutable mapping** — an active Owner Mapping matches a stable credential, application, or source object identifier.
+2. **Owner Tag** — the retained discovery tag matches an active receiver email address.
+3. **Owner Rule** — the first active, priority-ordered matching rule supplies a Notification Group.
+4. **Default triage** — the configured triage group receives anything still unresolved.
 
-If both user and team are accidentally configured, the user takes precedence.
+Immutable mappings take precedence even if display names or personnel change. Rules should be used only for stable patterns, not as a substitute for mappings.
 
-## Recommended starter rules
+## Operator setup
 
-Use rules only for stable, meaningful patterns:
+### Create groups and receivers
 
-| Priority | Scope | Pattern | Assignment |
-|---:|---|---|---|
-| 100 | Environment | `production` | Production platform team |
-| 200 | Resource Group | `integration` | Integration operations team |
-| 300 | Key Vault Name | `shared` | Shared services team |
-| 9999 | Display Name | empty | Ownership triage team |
+1. Create a Notification Group for each accountable operational function, such as Platform Operations or Application Support.
+2. Add at least one active Notification Receiver to each group.
+3. Select the receiver type and enter the monitored email address or Teams channel destination.
+4. Optionally associate the correct Dataverse User or Contact.
+5. Keep group membership current when operational responsibilities change.
 
-The final catch-all prevents credentials from disappearing into an unassigned queue, but it should point to a triage team rather than an individual.
+Prefer shared, monitored destinations over personal addresses for durable coverage.
 
-## Hundreds of randomly named app registrations
+### Map credentials and applications
 
-Name-based rules are not reliable when application names are inconsistent. Use this precedence:
+Create an Owner Mapping when responsibility is known and must survive renames. Use the most stable available identifiers, such as credential source identity, Entra App ID, or source Object ID, and select the responsible Notification Group.
 
-1. **Entra application owners** - preferred source.
-2. **Immutable application mapping** - map by App ID or Object ID.
-3. **Resource ownership tags** - suitable for Azure resources.
-4. **Pattern rules** - only for stable naming or environment conventions.
-5. **Triage team** - catch anything unresolved.
+For bulk onboarding:
 
-### Improve existing Entra ownership
+1. Export application and credential identifiers, current Entra owners, Owner Tags, and expiry dates.
+2. Obtain responsibility confirmation from the relevant operational teams.
+3. Create mappings for confirmed assignments.
+4. Improve Entra ownership where it is missing or stale.
+5. Leave unresolved records for the default triage group rather than creating fragile name rules.
 
-For each app registration:
+### Configure rules
 
-- Assign at least one accountable Entra owner.
-- Prefer a monitored operational owner rather than the original developer.
-- Remove departed or disabled owners.
-- Review applications with no owners as an exception queue.
+Create active Owner Rules with explicit priorities and a target Notification Group. Lower priority numbers are evaluated first. Use scopes such as environment, resource group, vault name, display name, or Owner Tag only when the pattern is stable.
 
-The discovery flow reads the first Entra application owner and places the email in Owner Tag. The resolver then maps it to an active Dataverse user.
+Do not target a Dataverse user or team. The desired rule output is a Notification Group.
 
-### Bulk mapping process
+### Configure default triage
 
-For an existing estate:
+Create a dedicated, active Notification Group with a monitored receiver for unresolved responsibility. Mark it as the single default triage group.
 
-1. Export App ID, Object ID, display name, current owners, and credential expiry.
-2. Send the list to application or platform teams for ownership confirmation.
-3. Capture the approved primary owner email or team.
-4. Update Entra owners wherever possible.
-5. Use a temporary triage rule for records still awaiting confirmation.
-6. Re-run discovery and owner resolution.
-7. Review unresolved ownership events.
+Review the triage queue regularly and replace repeated fallback assignments with immutable mappings or corrected Entra ownership.
 
-Do not create hundreds of display-name rules. They are difficult to maintain and break when applications are renamed.
+## Interpret delivery records
 
-### Recommended future enhancement
+`Queue-CLMCredentialNotifications` creates one deduplicated Notification Delivery queue record per credential, reminder bucket, receiver, and channel. Operators should use it to answer:
 
-Add a `clm_ownermapping` table keyed by immutable identifiers:
+- Which credential and Notification Group generated the notification?
+- Which receiver and channel were targeted?
+- Was delivery attempted, successful, failed, or skipped?
+- When was the attempt made?
+- What provider response or error was recorded?
+- Does a retry or receiver correction remain necessary?
 
-| Column | Purpose |
-|---|---|
-| Source System | Entra application, enterprise application, Key Vault, and so on |
-| Object ID | Stable source object identifier |
-| App ID | Stable Entra application identifier |
-| Owner User | Primary Dataverse user |
-| Owner Team | Primary Dataverse team |
-| Effective Until | Optional review/expiry date |
-| Last Validated On | Ownership attestation date |
-
-The future resolver order should be:
-
-1. Locked manual owner
-2. Immutable-ID mapping
-3. Entra owner or resource tag
-4. Owner Rule
-5. Triage team
-
-This removes dependence on random or changing names.
-
-## Resolver safeguards
-
-- Processes Dataverse pagination for large estates.
-- Uses sequential credential processing to prevent rule-statistic update races.
-- Ignores disabled Dataverse users.
-- Clears the opposite lookup when assigning a user or team.
-- Updates rule match count and last-matched time.
-- Records assignments and failures in Renewal Events.
+One notification event can produce multiple delivery records when a group has multiple receivers. Records remain Pending or Retrying until an approved transport broker processes them.
 
 ## Current limitations
 
-- Entra enterprise-application owners are not yet collected by the discovery flow.
-- Match Pattern is substring matching, not regular expressions.
-- Direct immutable-ID mappings require the proposed `clm_ownermapping` enhancement.
+- The current environment DLP policy blocks Outlook and Teams connectors in a Dataverse flow. The packaged solution therefore resolves and queues notifications but does not dispatch them.
+- Outbound email and Teams delivery requires an approved broker or a DLP policy change.
+- Older environments may still contain legacy owner columns or rules and require environment-specific cleanup; those components are not part of the desired vanilla model.

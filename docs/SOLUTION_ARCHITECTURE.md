@@ -1,105 +1,78 @@
 # CLM solution architecture
 
-This document describes the four modular solutions included in `packages/`.
+CLM uses modular Power Platform solutions and an Azure Action Group-style notification model.
 
-## Decision
-
-CLM uses five modular solutions:
+## Target architecture
 
 ```text
-CLMTables
+CLMTables 1.1.0.6
    ├── CLMDiscoveryFlow
-   ├── CLMOwnerResolver
+   ├── CLMNotifications 1.0.0.0
    └── CLMApp
 
 clmPlatformOps
    └── CLMDiscoveryFlow
 ```
 
-`CLMTables` is the data foundation. `clmPlatformOps` supplies the discovery connectors. `CLMDiscoveryFlow` performs discovery. `CLMOwnerResolver` assigns users or teams. `CLMApp` provides the operator interface.
+`CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. `CLMApp` provides the operator interface.
 
-## Reviewed solution inventory
+## Data foundation: CLMTables 1.1.0.6
 
-### CLMTables 1.0.0.3
-
-**Root components:** 19
-
-- Six tables
-- Ten global choices
-- Three security roles
-
-The solution includes the standard table forms, views, relationships, charts, and the `clm_daysuntilexpiry` formula:
-
-```powerfx
-DateDiff(Now(), clm_expirydate, TimeUnit.Days)
-```
-
-The six tables are:
+The vanilla model includes the established discovery and lifecycle tables plus:
 
 | Table | Purpose |
 |---|---|
-| `clm_credential` | Discovered credential inventory and lifecycle state |
-| `clm_sourceenvironment` | Tenant, subscription, vault, and environment discovery scopes |
-| `clm_coveragegap` | Discovery failures and inaccessible scopes |
-| `clm_discoveryrun` | Intended run-level audit record |
-| `clm_renewalevent` | Credential lifecycle and discovery event history |
-| `clm_ownerrule` | Rules used to resolve or infer credential ownership |
+| Notification Group (`clm_notificationgroup`) | Stable operational notification destination |
+| Notification Receiver (`clm_notificationreceiver`) | Email, shared mailbox, distribution or Microsoft 365 group, or Teams channel endpoint |
+| Owner Mapping (`clm_ownermapping`) | Immutable source identifier mapped to a Notification Group |
+| Notification Delivery (`clm_notificationdelivery`) | Per-receiver notification audit record |
 
-The global choices are `clm_sourcesystem`, `clm_credentialtype`, `clm_credentialstatus`, `clm_reminderbucket`, `clm_runstatus`, `clm_eventaction`, `clm_matchscope`, `clm_scopetype`, `clm_gaptype`, and `clm_gapstatus`.
+Credential has a Notification Group lookup and retains Owner Tag as resolution input. It does not have custom Owner User, Owner Team, Owner Source, or Owner Locked columns in the desired vanilla model.
 
-The `clm_ownersource` field is present on `clm_credential` as a local choice. It is no longer included as a global choice.
+Owner Rule conceptually targets a Notification Group. Legacy assignment fields that remain in an upgraded environment are cleanup residue, not part of this architecture.
 
-The included roles are `CLM Reader`, `CLM Owner`, and `CLM Platform Ops`.
+Notification Receiver may optionally reference the correct Dataverse User and Contact. Those associations provide identity and traceability; they do not replace the receiver endpoint.
 
-### clmPlatformOps 1.0.0.2
+## Responsibility model
 
-**Root components:** 2
+CLM deliberately separates:
 
-- `clm_5Fclmgraphdiscovery`
-- `clm_5Fclmarmdiscovery`
+- **Dataverse ownership:** standard Owning User and Owning Team fields used by Dataverse security and record administration.
+- **Notification responsibility:** the Notification Group assigned to a credential.
 
-This solution should be the long-term owner of the custom connectors.
+A Notification Group can fan out to multiple receivers, allowing a shared mailbox, distribution or Microsoft 365 group, Teams channel, or individual email endpoint to receive the same operational notification.
 
-### CLMDiscoveryFlow 1.0.0.26
+## Resolution and delivery
 
-**Root components:** 1
+`Resolve-CLMNotificationGroups` uses this fixed precedence:
 
-- `Discovery-CLMCredentials`
+1. Immutable Owner Mapping
+2. Owner Tag receiver match
+3. Owner Rule
+4. Default triage group
 
-The flow runs daily at 02:00 AUS Eastern Standard Time and has four table dependencies: credential, source environment, coverage gap, and renewal event.
+After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated Notification Delivery record per receiver and channel. Delivery records preserve the credential, group, receiver, channel, queue state, time, and diagnostic details.
 
-The custom connectors are owned only by `clmPlatformOps 1.0.0.2`.
+## Solution inventory and readiness
 
-### CLMOwnerResolver 1.0.0.6
-
-**Root components:** 1
-
-- `OwnerResolver-CLMCredentials`
-
-The resolver runs daily at 03:00 AUS Eastern Standard Time and uses Dataverse only. It resolves Owner Tags to active users, applies priority-ordered Owner Rules, assigns either Owner User or Owner Team, and records audit events.
-
-### CLMApp 1.0.0.3
-
-**Root components:** 5
-
-- Credential table component
-- `CLM Operations` dashboard
-- Connector icon web resource
-- `clm_CredentialLifecycle` sitemap
-- `clm_CredentialLifecycle` model-driven app
-
-The app navigation references all six CLM tables. Its dashboard and charts also depend on table views and columns supplied by `CLMTables`.
-
+| Solution | Version or state | Responsibility |
+|---|---|---|
+| `CLMTables` | 1.1.0.6 packaged | Tables, choices, relationships, and roles |
+| `clmPlatformOps` | 1.0.0.2 packaged | Graph and Azure custom connectors |
+| `CLMDiscoveryFlow` | 1.0.0.26 packaged | Daily credential discovery |
+| `CLMNotifications` | 1.0.0.0 packaged | Group resolution, deduplicated queueing, and delivery audit |
+| `CLMApp` | 1.0.0.5 packaged | Model-driven operations interface with notification administration and audit pages |
 ## Installation
 
-Normal deployment uses solution import only. Follow [`INSTALL.md`](INSTALL.md) for the single supported setup path.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_6.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`.
 
-## Architecture gaps
+See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
-| Gap | Impact | Required change |
-|---|---|---|
-| Connector OAuth settings use neutral placeholders | Connections fail until customer values are entered | Set client ID, tenant ID, secret, and redirect URIs during installation |
-| Enterprise-application Owner Tag is not populated | Enterprise-application credentials require rule or manual assignment | Add service-principal owner discovery |
-| Random application names do not support reliable pattern rules | Large estates retain unresolved ownership | Add immutable App ID/Object ID mappings |
-| Discovery flow does not write `clm_discoveryrun` | No run-level audit record despite the table and variable | Add create/update actions around each flow execution |
-| Checked-in source predates the current packages | Scripts and JSON may recreate older architecture | Refresh source from the release packages before further development |
+## Current implementation gaps
+
+| Gap | Impact |
+|---|---|
+| Environment DLP blocks Outlook and Teams with Dataverse | The packaged flow creates Pending/Retrying delivery records; an approved transport broker must dispatch them |
+| Older environments may retain legacy owner fields | Upgrade cleanup must remove or retire fields outside the vanilla model |
+| Enterprise-application owner discovery may be incomplete | Some records will depend on mappings, tags, rules, or triage |
+| Discovery does not yet provide a complete run-level audit | Operational review still depends on flow history and existing event records |
