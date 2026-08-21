@@ -90,17 +90,6 @@ The queue flow is intentionally Dataverse-only. It does not send email or Teams 
 7. Run `Resolve-CLMNotificationGroups`, then review assigned credentials.
 8. Run `Queue-CLMCredentialNotifications`, then review Notification Delivery records.
 
-## Existing AT environment correction
-
-The earlier AT notification upgrade created Credential's `Notification Group` lookup against Notification Receiver. Before importing the out-of-band corrective patch:
-
-1. Delete Credential's incorrect `Notification Group` lookup in AT.
-2. Import `CLMTables_NotificationLookupFixPatch_1_1_1_0.zip`.
-3. Publish all customizations.
-4. Verify that `clm_credential.clm_NotificationGroup` targets Notification Group. The current clean schema uses relationship `clm_credential_clm_NotificationGroup`.
-
-The corrective patch is deployment-only and is intentionally not stored in this repository.
-
 See [Notification responsibility resolution](OWNER_RESOLUTION.md) for operating guidance.
 
 ## Access
@@ -117,7 +106,6 @@ Assign users an included role appropriate to their duties:
 
 | Problem | First check |
 |---|---|
-| Credential Notification Group opens Notification Receiver | Delete the incorrect lookup and apply the AT corrective patch |
 | Connector sign-in fails | Client ID, client secret, tenant ID, and redirect URI |
 | Graph actions return 403 | Graph permissions and admin consent |
 | Azure actions return 403 | Service-account Azure RBAC assignments |
