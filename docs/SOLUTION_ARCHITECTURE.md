@@ -5,7 +5,7 @@ CLM uses modular Power Platform solutions and an Azure Action Group-style notifi
 ## Target architecture
 
 ```text
-CLMTables 1.1.0.6
+CLMTables 1.1.0.7
    ├── CLMDiscoveryFlow
    ├── CLMNotifications 1.0.0.0
    └── CLMApp
@@ -16,7 +16,7 @@ clmPlatformOps
 
 `CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. `CLMApp` provides the operator interface.
 
-## Data foundation: CLMTables 1.1.0.6
+## Data foundation: CLMTables 1.1.0.7
 
 The vanilla model includes the established discovery and lifecycle tables plus:
 
@@ -57,14 +57,14 @@ After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated No
 
 | Solution | Version or state | Responsibility |
 |---|---|---|
-| `CLMTables` | 1.1.0.6 packaged | Tables, choices, relationships, and roles |
+| `CLMTables` | 1.1.0.7 packaged | Tables, choices, relationships, and roles |
 | `clmPlatformOps` | 1.0.0.2 packaged | Graph and Azure custom connectors |
 | `CLMDiscoveryFlow` | 1.0.0.26 packaged | Daily credential discovery |
 | `CLMNotifications` | 1.0.0.0 packaged | Group resolution, deduplicated queueing, and delivery audit |
 | `CLMApp` | 1.0.0.5 packaged | Model-driven operations interface with notification administration and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_6.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_7.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
