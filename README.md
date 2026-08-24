@@ -1,6 +1,15 @@
 # Credential Lifecycle Manager
 
-Credential Lifecycle Manager (CLM) discovers expiring credentials, records coverage gaps, and provides a Dataverse model-driven app for operations.
+Credential Lifecycle Manager (CLM) helps organizations find and manage credentials before they expire and disrupt services. Built on Microsoft Power Platform, it discovers credentials across Microsoft Entra ID and Azure Key Vault, centralizes them in Dataverse, and gives operations teams a model-driven app for monitoring renewal risk.
+
+CLM can:
+
+- Discover application secrets, certificates, enterprise application certificates, and Key Vault secrets.
+- Track credential owners, expiry dates, source environments, and renewal activity.
+- Highlight discovery failures and coverage gaps.
+- Route renewal notifications to responsible operational groups.
+- Queue auditable email and Microsoft Teams notifications.
+- Operate through packaged Power Platform solutions with configurable connectors and security roles.
 
 ## Notification model
 
