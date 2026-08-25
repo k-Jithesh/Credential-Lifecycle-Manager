@@ -76,7 +76,7 @@ The reusable-receiver redesign does not require a dispatcher package change. Dis
 | `CLMApp` | 1.1.0.0 packaged | Model-driven operations interface with owner, membership, notification, and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_1_0.zip`, followed by the packaged connectors, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMNotifications_1_3_0_0.zip`, and `CLMApp_1_1_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_1_0.zip`, followed by `clmPlatformOps_1_1_0_0.zip`, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMApp_1_1_0_0.zip`, and `CLMNotifications_1_3_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
