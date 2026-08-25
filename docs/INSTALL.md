@@ -4,11 +4,11 @@ CLM is installed through Power Platform solution import. PowerShell is not requi
 
 ## Readiness
 
-The notification data model is packaged as `CLMTables_1_2_1_0.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_1_0_0.zip`.
+The notification data model is packaged as `CLMTables_1_2_2_0.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_1_0_0.zip`.
 
 The deployment packages are:
 
-- `CLMTables_1_2_1_0.zip`
+- `CLMTables_1_2_2_0.zip`
 - `clmPlatformOps_1_0_0_2.zip`
 - `CLMDiscoveryFlow_1_0_0_26.zip`
 - `CLMNotifications_1_1_0_0.zip`
@@ -30,13 +30,15 @@ You need:
 
 ### 1. Import the tables
 
-Import `CLMTables_1_2_1_0.zip`.
+Import `CLMTables_1_2_2_0.zip`.
 
 When upgrading from `CLMTables 1.1.0.6`, review and re-save Notification Group **Digest Enabled** and **Enabled**, Notification Receiver **Active**, and Owner Mapping **Active**. Version 1.1.0.7 corrected their inverted Boolean labels to `0 = False` and `1 = True`, but importing metadata does not rewrite existing stored values.
 
 Version 1.2.0.0 adds Notification Group **Reminder Days**. Existing groups with a blank value retain the default 90, 60, 30, 7, and expiry-day schedule until an operator saves a custom selection.
 
 Version 1.2.1.0 adds **Notification Group** to all Credential public views so operators can see routing responsibility without opening each credential.
+
+Version 1.2.2.0 updates **Orphans (No Notification Group)** to show active, non-system credentials whose Notification Group lookup is empty.
 
 The vanilla model includes:
 

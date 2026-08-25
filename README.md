@@ -33,7 +33,7 @@ Use Power Platform solution import for deployment. See:
 
 **[Install CLM](docs/INSTALL.md)**
 
-The data foundation is `CLMTables 1.2.1.0`. `CLMNotifications 1.1.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
+The data foundation is `CLMTables 1.2.2.0`. `CLMNotifications 1.1.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
 
 The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse.
 
@@ -41,7 +41,7 @@ The core notification flows use only the Dataverse connector so they remain comp
 
 | Solution | Purpose | Readiness |
 |---|---|---|
-| `CLMTables 1.2.1.0` | Dataverse tables, choices, relationships, roles, and Credential public views | Packaged |
+| `CLMTables 1.2.2.0` | Dataverse tables, choices, relationships, roles, and Credential public views | Packaged |
 | `clmPlatformOps 1.0.0.2` | Graph and Azure custom connectors | Packaged |
 | `CLMDiscoveryFlow 1.0.0.26` | Daily credential discovery | Packaged |
 | `CLMNotifications 1.1.0.0` | Per-group reminder scheduling, notification-group resolution, and delivery queue audit | Packaged |
