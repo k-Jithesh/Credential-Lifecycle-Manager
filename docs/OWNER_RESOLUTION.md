@@ -2,7 +2,7 @@
 
 CLM routes credential notifications through Azure Action Group-style Notification Groups. A group is the stable operational destination; its receivers define the actual delivery endpoints.
 
-The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.0.0.0`.
+The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.1.0.0`.
 
 ## Ownership versus notification responsibility
 
@@ -14,7 +14,7 @@ Notification responsibility is represented by the Credential **Notification Grou
 
 | Table | Purpose |
 |---|---|
-| Notification Group (`clm_notificationgroup`) | Named operational destination assigned to credentials |
+| Notification Group (`clm_notificationgroup`) | Named operational destination and configurable reminder schedule assigned to credentials |
 | Notification Receiver (`clm_notificationreceiver`) | One delivery endpoint belonging to a Notification Group |
 | Owner Mapping (`clm_ownermapping`) | Immutable credential or application identifier mapped to a Notification Group |
 | Notification Delivery (`clm_notificationdelivery`) | Audit record for an attempted notification to a receiver |
@@ -46,12 +46,19 @@ Immutable mappings take precedence even if display names or personnel change. Ru
 ### Create groups and receivers
 
 1. Create a Notification Group for each accountable operational function, such as Platform Operations or Application Support.
-2. Add at least one active Notification Receiver to each group.
-3. Select the receiver type and enter the monitored email address or Teams channel destination.
-4. Optionally associate the correct Dataverse User or Contact.
-5. Keep group membership current when operational responsibilities change.
+2. Select one or more **Reminder Days**: 90, 60, 30, 7, and expiry day.
+3. Add at least one active Notification Receiver to each group.
+4. Select the receiver type and enter the monitored email address or Teams channel destination.
+5. Optionally associate the correct Dataverse User or Contact.
+6. Keep group membership and reminder schedules current when operational responsibilities change.
 
 Prefer shared, monitored destinations over personal addresses for durable coverage.
+
+### Configure reminder days
+
+Reminder Days is a multi-select setting on each Notification Group. The daily queue evaluates a credential against the schedule of its resolved group and creates deliveries only when the credential enters a selected threshold.
+
+A blank Reminder Days value uses all five thresholds—90, 60, 30, 7, and expiry day—to preserve notification coverage for groups upgraded from an earlier release. To stop a group entirely, disable the group rather than clearing Reminder Days.
 
 ### Map credentials and applications
 
@@ -90,7 +97,7 @@ Review the triage queue regularly and replace repeated fallback assignments with
 
 One notification event can produce multiple delivery records when a group has multiple receivers. The optional `CLMNotificationDispatchers` solution provides separate email and Teams flows that process Pending or Retrying records, then record Sent or Failed with attempt details.
 
-The daily queue creates one delivery per receiver and channel when a credential first enters each reminder bucket: 90 days, 60 days, 30 days, 14 days, 7 days, and Overdue. Deduplication prevents daily repeats inside a bucket. Overdue is a single bucket, so it produces one notification rather than a daily overdue reminder.
+The daily queue creates one delivery per receiver and channel when a credential first enters a Reminder Day selected by its Notification Group. Supported thresholds are 90 days, 60 days, 30 days, 7 days, and expiry day. Deduplication prevents daily repeats inside a bucket. The queue does not create a new overdue bucket after the expiry-day threshold has passed.
 
 Dispatch uses at-least-once delivery semantics. If a provider accepts a message but the subsequent Dataverse status update fails, an operator retry can deliver the message again. Review provider history before retrying ambiguous failures. A receiver deactivated after queueing is not contacted; its delivery is marked Skipped.
 

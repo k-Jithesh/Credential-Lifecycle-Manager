@@ -5,9 +5,9 @@ CLM uses modular Power Platform solutions and an Azure Action Group-style notifi
 ## Target architecture
 
 ```text
-CLMTables 1.1.0.7
+CLMTables 1.2.0.0
    ├── CLMDiscoveryFlow
-   ├── CLMNotifications 1.0.0.0
+   ├── CLMNotifications 1.1.0.0
    ├── CLMNotificationDispatchers 1.0.0.0 (optional)
    └── CLMApp
 
@@ -17,13 +17,13 @@ clmPlatformOps
 
 `CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. The optional `CLMNotificationDispatchers` solution sends queued email and Teams messages where DLP permits. `CLMApp` provides the operator interface.
 
-## Data foundation: CLMTables 1.1.0.7
+## Data foundation: CLMTables 1.2.0.0
 
 The vanilla model includes the established discovery and lifecycle tables plus:
 
 | Table | Purpose |
 |---|---|
-| Notification Group (`clm_notificationgroup`) | Stable operational notification destination |
+| Notification Group (`clm_notificationgroup`) | Stable operational notification destination with selectable 90, 60, 30, 7, and expiry-day reminders |
 | Notification Receiver (`clm_notificationreceiver`) | Email, shared mailbox, distribution or Microsoft 365 group, or Teams channel endpoint |
 | Owner Mapping (`clm_ownermapping`) | Immutable source identifier mapped to a Notification Group |
 | Notification Delivery (`clm_notificationdelivery`) | Per-receiver notification audit record |
@@ -52,7 +52,7 @@ A Notification Group can fan out to multiple receivers, allowing a shared mailbo
 3. Owner Rule
 4. Default triage group
 
-After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated Notification Delivery record per receiver and channel. Delivery records preserve the credential, group, receiver, channel, queue state, time, and diagnostic details.
+After resolution, `Queue-CLMCredentialNotifications` evaluates the Reminder Days selected by the assigned Notification Group and creates one deduplicated Notification Delivery record per receiver and channel at each enabled threshold. A blank schedule preserves all thresholds for upgraded groups. Delivery records preserve the credential, group, receiver, channel, queue state, time, and diagnostic details.
 
 `Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently every five minutes. Each processes up to 100 oldest Pending or Retrying records for its channel, sends through its dedicated connector, and updates the delivery record to Sent or Failed.
 
@@ -60,15 +60,15 @@ After resolution, `Queue-CLMCredentialNotifications` creates one deduplicated No
 
 | Solution | Version or state | Responsibility |
 |---|---|---|
-| `CLMTables` | 1.1.0.7 packaged | Tables, choices, relationships, and roles |
+| `CLMTables` | 1.2.0.0 packaged | Tables, choices, relationships, roles, and per-group reminder schedules |
 | `clmPlatformOps` | 1.0.0.2 packaged | Graph and Azure custom connectors |
 | `CLMDiscoveryFlow` | 1.0.0.26 packaged | Daily credential discovery |
-| `CLMNotifications` | 1.0.0.0 packaged | Group resolution, deduplicated queueing, and delivery audit |
+| `CLMNotifications` | 1.1.0.0 packaged | Group resolution, per-group reminder evaluation, deduplicated queueing, and delivery audit |
 | `CLMNotificationDispatchers` | 1.0.0.0 packaged | Optional email and Teams delivery in DLP-compatible environments |
 | `CLMApp` | 1.0.0.5 packaged | Model-driven operations interface with notification administration and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_1_0_7.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_0_0_0.zip`, and `CLMApp_1_0_0_5.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_2_0_0.zip`, followed by the packaged connectors, discovery flow, `CLMNotifications_1_1_0_0.zip`, and `CLMApp_1_0_0_5.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
