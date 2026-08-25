@@ -4,16 +4,16 @@ CLM is installed through Power Platform solution import. PowerShell is not requi
 
 ## Readiness
 
-The notification data model is packaged as `CLMTables_1_2_3_0.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_1_0_0.zip`.
+The notification data model is packaged as `CLMTables_1_3_0_0.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_2_0_0.zip`.
 
 The deployment packages are:
 
-- `CLMTables_1_2_3_0.zip`
-- `clmPlatformOps_1_0_0_2.zip`
-- `CLMDiscoveryFlow_1_0_0_26.zip`
-- `CLMNotifications_1_1_0_0.zip`
+- `CLMTables_1_3_0_0.zip`
+- `clmPlatformOps_1_1_0_0.zip`
+- `CLMDiscoveryFlow_1_1_0_0.zip`
+- `CLMNotifications_1_2_0_0.zip`
 - `CLMNotificationDispatchers_1_0_0_0.zip` (optional; requires compatible DLP)
-- `CLMApp_1_0_0_5.zip`
+- `CLMApp_1_1_0_0.zip`
 
 ## Before you start
 
@@ -30,22 +30,14 @@ You need:
 
 ### 1. Import the tables
 
-Import `CLMTables_1_2_3_0.zip`.
-
-When upgrading from `CLMTables 1.1.0.6`, review and re-save Notification Group **Digest Enabled** and **Enabled**, Notification Receiver **Active**, and Owner Mapping **Active**. Version 1.1.0.7 corrected their inverted Boolean labels to `0 = False` and `1 = True`, but importing metadata does not rewrite existing stored values.
-
-Version 1.2.0.0 adds Notification Group **Reminder Days**. Existing groups with a blank value retain the default 90, 60, 30, 7, and expiry-day schedule until an operator saves a custom selection.
-
-Version 1.2.1.0 adds **Notification Group** to all Credential public views so operators can see routing responsibility without opening each credential.
-
-Version 1.2.2.0 updates **Orphans (No Notification Group)** to show active, non-system credentials whose Notification Group lookup is empty.
-
-Version 1.2.3.0 corrects the Notification Group primary-name label and arranges the default view as Notification Group, Reminder Days, Enabled, Default Triage Group, Digest Enabled, Digest Hour, and Description.
+Import `CLMTables_1_3_0_0.zip`.
 
 The vanilla model includes:
 
 - Notification Group (`clm_notificationgroup`)
 - Notification Receiver (`clm_notificationreceiver`)
+- Notification Group Membership (`clm_notificationgroupmembership`)
+- Credential Owner (`clm_credentialowner`)
 - Owner Mapping (`clm_ownermapping`)
 - Notification Delivery (`clm_notificationdelivery`)
 - A Notification Group lookup and Owner Tag on Credential
@@ -55,13 +47,13 @@ Credential does not use custom Owner User, Owner Team, Owner Source, or Owner Lo
 
 ### 2. Import and configure the connectors
 
-Import `clmPlatformOps_1_0_0_2.zip`.
+Import `clmPlatformOps_1_1_0_0.zip`.
 
 The connectors contain neutral OAuth placeholders. Follow [Custom connector setup](CUSTOM_CONNECTORS.md), enter deployment-specific values, and create both connections before continuing.
 
 ### 3. Import the discovery flow
 
-Import `CLMDiscoveryFlow_1_0_0_26.zip`.
+Import `CLMDiscoveryFlow_1_1_0_0.zip`.
 
 During import, map:
 
@@ -73,19 +65,19 @@ During import, map:
 
 ### 4. Import the app
 
-Import `CLMApp_1_0_0_5.zip`.
+Import `CLMApp_1_1_0_0.zip`.
 
-The app exposes Credentials, discovery and audit records, Owner Rules, Notification Groups, Notification Receivers, Owner Mappings, and Notification Deliveries under its Operations navigation group.
+The app exposes Credentials, discovered Credential Owners, discovery and audit records, Owner Rules, Notification Groups, reusable Notification Receivers, Notification Group Memberships, Owner Mappings, and Notification Deliveries under its Operations navigation group.
 
 ### 5. Import notifications
 
-Import `CLMNotifications_1_1_0_0.zip` and map `clm_sharedcommondataserviceforapps_23bc7` to a Dataverse connection.
+Import `CLMNotifications_1_2_0_0.zip` and map `clm_sharedcommondataserviceforapps_23bc7` to a Dataverse connection.
 
 Enable these flows:
 
 | Flow | Default schedule | Purpose |
 |---|---|---|
-| `Resolve-CLMNotificationGroups` | Daily at 03:00 Australian Eastern time | Assigns unassigned credentials using mappings, Owner Tag, rules, then default triage |
+| `Resolve-CLMNotificationGroups` | Daily at 03:00 Australian Eastern time | Assigns unassigned credentials using mappings, all discovered owners, rules, then default triage |
 | `Queue-CLMCredentialNotifications` | Daily at 07:00 Australian Eastern time | Creates deduplicated Pending or Retrying Notification Delivery records |
 
 The queue flow is intentionally Dataverse-only.
@@ -115,14 +107,16 @@ Do not enable a dispatcher until its connection is owned by an approved service 
 
 1. Create Notification Groups for accountable operational functions.
 2. Select the Notification Group **Reminder Days** required by that team: 90, 60, 30, 7, and/or expiry day.
-3. Add active Notification Receivers to each group.
-4. Create immutable Owner Mappings for credentials or applications that need explicit routing.
-5. Configure Owner Rules to target Notification Groups for stable fallback patterns.
-6. Designate exactly one active Notification Group as the default triage destination.
-7. Turn on and run `Discovery-CLMCredentials`.
-8. Run `Resolve-CLMNotificationGroups`, then review assigned credentials.
-9. Run `Queue-CLMCredentialNotifications`, then review Notification Delivery records.
-10. In a DLP-compatible environment, enable the required dispatcher and confirm delivery rows move from Pending to Sent.
+3. Create each Notification Receiver once.
+4. Create active Notification Group Memberships to add receivers to groups; a receiver can participate in multiple groups.
+5. For a receiver that can drive owner resolution, mark no more than one membership **Use for Owner Resolution**.
+6. Create immutable Owner Mappings for credentials or applications that need explicit routing.
+7. Configure Owner Rules to target Notification Groups for stable fallback patterns or ambiguous-owner cases.
+8. Designate exactly one active Notification Group as the default triage destination.
+9. Turn on and run `Discovery-CLMCredentials`, then review Credential Owner records.
+10. Run `Resolve-CLMNotificationGroups`, then review assigned credentials and ambiguity events.
+11. Run `Queue-CLMCredentialNotifications`, then review Notification Delivery records.
+12. In a DLP-compatible environment, enable the required dispatcher and confirm delivery rows move from Pending to Sent.
 
 When a recipient starts renewal, set the Credential to **In Renewal**, add its **Renewal Ticket URL**, and set **Suppressed Until** to the next follow-up date. See [Notification responsibility resolution](OWNER_RESOLUTION.md) for reminder-bucket and suppression behavior.
 

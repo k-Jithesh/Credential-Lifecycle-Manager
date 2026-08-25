@@ -9,9 +9,9 @@ CLM uses two custom connectors because Power Platform custom connectors are sing
 
 ## Solution ownership
 
-The owner is **`clmPlatformOps 1.0.0.2`**.
+The owner is **`clmPlatformOps 1.1.0.0`**. The Graph connector declares paged application-owner responses and exposes owner UPN and mail fields.
 
-`CLMDiscoveryFlow 1.0.0.26` contains only the flow and depends on these connectors. Import and configure `clmPlatformOps` first.
+`CLMDiscoveryFlow 1.1.0.0` contains only the flow and depends on these connectors. Import and configure `clmPlatformOps` first.
 
 ## Authentication
 

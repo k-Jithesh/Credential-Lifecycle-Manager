@@ -1,6 +1,6 @@
 # Discovery-CLMCredentials
 
-`Discovery-CLMCredentials` is the cloud flow exported in `CLMDiscoveryFlow 1.0.0.26`.
+`Discovery-CLMCredentials` is the cloud flow exported in `CLMDiscoveryFlow 1.1.0.0`.
 
 ## Schedule and connections
 
@@ -14,11 +14,11 @@
 
 ### Entra applications
 
-The Graph leg pages through applications, reads the first owner, and processes password and certificate credentials. App registrations do not support Azure resource tags, so the owner's UPN or email is stored in `clm_ownertag` as an Owner Hint.
+The Graph leg pages through applications and processes password and certificate credentials. For each credential it refreshes every owner returned by Graph into related Credential Owner rows, including the Entra object ID, display name, UPN, email, active state, and last-seen time.
 
 ### Enterprise applications
 
-The enterprise-application leg pages through service principals and processes their certificate credentials. It does not currently populate an Owner Hint.
+The enterprise-application leg pages through service principals and processes their certificate credentials. It does not currently populate Credential Owner rows, so these credentials require an Owner Mapping or Owner Rule.
 
 ### Azure and Key Vault
 
@@ -33,6 +33,7 @@ Separate handlers record Graph, enterprise-application, and ARM failures. Covera
 The exported flow declares dependencies on:
 
 - `clm_credential`
+- `clm_credentialowner`
 - `clm_sourceenvironment`
 - `clm_coveragegap`
 - `clm_renewalevent`
@@ -44,16 +45,16 @@ The flow reads or writes fields including:
 - Coverage-gap detection, HTTP/error detail, resolution hint, and failure count
 - Renewal-event action, occurrence time, payload, and flow-actor flag
 
-`CLMTables 1.2.3.0` must be imported before this solution.
+`CLMTables 1.3.0.0` must be imported before this solution.
 
 ## Current limitation
 
 The flow initializes `DiscoveryRunId`, but the reviewed export does not create or update a `clm_discoveryrun` row. Run-level audit records therefore require a future flow revision.
 
-The flow captures Owner Hints in the `clm_ownertag` compatibility column but does not resolve them to Dataverse Owner User or Owner Team lookups. See [`docs/OWNER_RESOLUTION.md`](../../docs/OWNER_RESOLUTION.md).
+Application owners are notification-routing inputs, not Dataverse record owners. Key Vault owner tags remain in `clm_ownertag` for Tag-scope rules. See [`docs/OWNER_RESOLUTION.md`](../../docs/OWNER_RESOLUTION.md).
 
 ## Install
 
 Follow [`docs/INSTALL.md`](../../docs/INSTALL.md). Normal deployment uses solution import and does not require PowerShell.
 
-The checked-in `definition.json` and `manifest.json` predate the current release package. Treat `CLMDiscoveryFlow 1.0.0.26` as authoritative until the source tree is refreshed from that package.
+The checked-in `definition.json` and `manifest.json` predate the current release package. Treat `CLMDiscoveryFlow 1.1.0.0` as authoritative until the source tree is refreshed from that package.
