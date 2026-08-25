@@ -2,7 +2,7 @@
 
 This document describes the target pattern for CLM discovery flows: try to enumerate, and if discovery cannot proceed, record exactly *why* in `clm_coveragegap`.
 
-The current `CLMDiscoveryFlow 1.0.0.26` implements credential, source-environment, coverage-gap, and renewal-event writes, but it does **not** yet create or complete `clm_discoveryrun` records. Treat the run-record steps below as the required next revision rather than current behaviour.
+The current `CLMDiscoveryFlow 1.1.0.2` implements credential, application-owner, source-environment, coverage-gap, and renewal-event writes, but it does **not** yet create or complete `clm_discoveryrun` records. Treat the run-record steps below as the required next revision rather than current behaviour.
 
 ---
 
