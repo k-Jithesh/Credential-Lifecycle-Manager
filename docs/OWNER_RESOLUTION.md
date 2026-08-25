@@ -2,7 +2,7 @@
 
 CLM routes credential notifications through Azure Action Group-style Notification Groups. A group is the stable operational destination; its receivers define the actual delivery endpoints.
 
-The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.2.0.0`.
+The former direct custom Owner User/Owner Team assignment model is superseded by `CLMNotifications 1.3.0.0`.
 
 ## Ownership versus notification responsibility
 
@@ -52,13 +52,15 @@ If discovered owners produce multiple candidate groups, CLM does not select the 
 1. Create a Notification Group for each accountable operational function, such as Platform Operations or Application Support.
 2. Select one or more **Reminder Days**: 90, 60, 30, 7, and expiry day.
 3. Create each Notification Receiver once, then select its type and enter the monitored email address or Teams channel destination.
-4. Create an active Notification Group Membership for every group that should notify the receiver.
+4. Create an active Notification Group Membership for every group that should notify the receiver. The form generates its name as `<receiver> - <group>`.
 5. Set membership **Sort Order** to control delivery ordering.
 6. Mark no more than one membership per receiver **Use for Owner Resolution**. Other memberships still receive notifications but do not make the receiver an ownership-routing candidate.
 7. Optionally associate the correct Dataverse User or Contact.
 8. Keep group memberships and reminder schedules current when operational responsibilities change.
 
 Prefer shared, monitored destinations over personal addresses for durable coverage.
+
+The membership primary name is generated rather than operator-maintained. The form script sets it immediately for interactive records. `Name-CLMNotificationGroupMembership` applies the same format after imports, API creation, or lookup reassignment; keep that flow enabled.
 
 ### Configure reminder days
 

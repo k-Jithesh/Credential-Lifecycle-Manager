@@ -34,7 +34,7 @@ Use Power Platform solution import for deployment. See:
 
 **[Install CLM](docs/INSTALL.md)**
 
-The data foundation is `CLMTables 1.3.0.0`. `CLMNotifications 1.2.0.0` resolves Notification Groups and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
+The data foundation is `CLMTables 1.3.1.0`. `CLMNotifications 1.3.0.0` resolves Notification Groups, maintains imported membership names, and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
 
 The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse.
 
@@ -42,10 +42,10 @@ The core notification flows use only the Dataverse connector so they remain comp
 
 | Solution | Purpose | Readiness |
 |---|---|---|
-| `CLMTables 1.3.0.0` | Dataverse tables, reusable receiver memberships, discovered owners, choices, relationships, roles, and curated public views | Packaged |
+| `CLMTables 1.3.1.0` | Dataverse tables, reusable receiver memberships, automatic form naming, discovered owners, choices, relationships, roles, and curated public views | Packaged |
 | `clmPlatformOps 1.1.0.0` | Graph and Azure custom connectors with paged application-owner discovery | Packaged |
 | `CLMDiscoveryFlow 1.1.0.2` | Daily credential and all-owner discovery | Packaged |
-| `CLMNotifications 1.2.0.0` | Multi-owner group resolution, per-group reminder scheduling, and delivery queue audit | Packaged |
+| `CLMNotifications 1.3.0.0` | Multi-owner group resolution, imported membership naming, per-group reminder scheduling, and delivery queue audit | Packaged |
 | `CLMNotificationDispatchers 1.0.0.0` | Optional email and Teams delivery from queued records | Packaged |
 | `CLMApp 1.1.0.0` | Model-driven operations app with owner, membership, notification, and audit pages | Packaged |
 

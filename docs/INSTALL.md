@@ -4,14 +4,14 @@ CLM is installed through Power Platform solution import. PowerShell is not requi
 
 ## Readiness
 
-The notification data model is packaged as `CLMTables_1_3_0_0.zip`. Notification resolution and queueing are packaged as `CLMNotifications_1_2_0_0.zip`.
+The notification data model is packaged as `CLMTables_1_3_1_0.zip`. Notification resolution, imported membership naming, and queueing are packaged as `CLMNotifications_1_3_0_0.zip`.
 
 The deployment packages are:
 
-- `CLMTables_1_3_0_0.zip`
+- `CLMTables_1_3_1_0.zip`
 - `clmPlatformOps_1_1_0_0.zip`
 - `CLMDiscoveryFlow_1_1_0_2.zip`
-- `CLMNotifications_1_2_0_0.zip`
+- `CLMNotifications_1_3_0_0.zip`
 - `CLMNotificationDispatchers_1_0_0_0.zip` (optional; requires compatible DLP)
 - `CLMApp_1_1_0_0.zip`
 
@@ -30,7 +30,7 @@ You need:
 
 ### 1. Import the tables
 
-Import `CLMTables_1_3_0_0.zip`.
+Import `CLMTables_1_3_1_0.zip`.
 
 The vanilla model includes:
 
@@ -71,12 +71,13 @@ The app exposes Credentials, discovered Credential Owners, discovery and audit r
 
 ### 5. Import notifications
 
-Import `CLMNotifications_1_2_0_0.zip` and map `clm_sharedcommondataserviceforapps_23bc7` to a Dataverse connection.
+Import `CLMNotifications_1_3_0_0.zip` and map `clm_sharedcommondataserviceforapps_23bc7` to a Dataverse connection.
 
 Enable these flows:
 
 | Flow | Default schedule | Purpose |
 |---|---|---|
+| `Name-CLMNotificationGroupMembership` | Event-driven | Names imported or API-created memberships as `<receiver> - <group>` when created or reassigned |
 | `Resolve-CLMNotificationGroups` | Daily at 03:00 Australian Eastern time | Assigns unassigned credentials using mappings, all discovered owners, rules, then default triage |
 | `Queue-CLMCredentialNotifications` | Daily at 07:00 Australian Eastern time | Creates deduplicated Pending or Retrying Notification Delivery records |
 
@@ -108,7 +109,7 @@ Do not enable a dispatcher until its connection is owned by an approved service 
 1. Create Notification Groups for accountable operational functions.
 2. Select the Notification Group **Reminder Days** required by that team: 90, 60, 30, 7, and/or expiry day.
 3. Create each Notification Receiver once.
-4. Create active Notification Group Memberships to add receivers to groups; a receiver can participate in multiple groups.
+4. Create active Notification Group Memberships to add receivers to groups; a receiver can participate in multiple groups. The form names each membership as `<receiver> - <group>`. Imports and API-created rows may be briefly unnamed until `Name-CLMNotificationGroupMembership` runs.
 5. For a receiver that can drive owner resolution, mark no more than one membership **Use for Owner Resolution**.
 6. Create immutable Owner Mappings for credentials or applications that need explicit routing.
 7. Configure Owner Rules to target Notification Groups for stable fallback patterns or ambiguous-owner cases.

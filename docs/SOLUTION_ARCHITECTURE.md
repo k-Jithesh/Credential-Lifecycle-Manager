@@ -5,9 +5,9 @@ CLM uses modular Power Platform solutions and an Azure Action Group-style notifi
 ## Target architecture
 
 ```text
-CLMTables 1.3.0.0
+CLMTables 1.3.1.0
    ├── CLMDiscoveryFlow
-   ├── CLMNotifications 1.2.0.0
+   ├── CLMNotifications 1.3.0.0
    ├── CLMNotificationDispatchers 1.0.0.0 (optional)
    └── CLMApp
 
@@ -17,7 +17,7 @@ clmPlatformOps
 
 `CLMTables` is the Dataverse foundation. `clmPlatformOps` supplies discovery connectors. `CLMDiscoveryFlow` discovers credentials. `CLMNotifications` resolves Notification Groups and queues auditable delivery records. The optional `CLMNotificationDispatchers` solution sends queued email and Teams messages where DLP permits. `CLMApp` provides the operator interface.
 
-## Data foundation: CLMTables 1.3.0.0
+## Data foundation: CLMTables 1.3.1.0
 
 The vanilla model includes the established discovery and lifecycle tables plus:
 
@@ -45,6 +45,8 @@ CLM deliberately separates:
 
 A Notification Group can fan out to multiple receivers, and one receiver can participate in multiple groups without duplicate receiver records.
 
+Membership names use `<receiver> - <group>`. A form script generates the name before an interactive save. The event-driven `Name-CLMNotificationGroupMembership` flow applies the same rule to imported or API-created rows and when either lookup is reassigned.
+
 ## Resolution and delivery
 
 `Resolve-CLMNotificationGroups` uses this fixed precedence:
@@ -66,15 +68,15 @@ The reusable-receiver redesign does not require a dispatcher package change. Dis
 
 | Solution | Version or state | Responsibility |
 |---|---|---|
-| `CLMTables` | 1.3.0.0 packaged | Tables, reusable memberships, all-owner records, choices, relationships, roles, schedules, and public views |
+| `CLMTables` | 1.3.1.0 packaged | Tables, reusable memberships, automatic form naming, all-owner records, choices, relationships, roles, schedules, and public views |
 | `clmPlatformOps` | 1.1.0.0 packaged | Graph and Azure custom connectors, including paged application-owner discovery |
 | `CLMDiscoveryFlow` | 1.1.0.2 packaged | Daily credential and all-owner discovery |
-| `CLMNotifications` | 1.2.0.0 packaged | Multi-owner group resolution, per-group reminder evaluation, deduplicated queueing, and delivery audit |
+| `CLMNotifications` | 1.3.0.0 packaged | Multi-owner group resolution, imported membership naming, per-group reminder evaluation, deduplicated queueing, and delivery audit |
 | `CLMNotificationDispatchers` | 1.0.0.0 packaged | Optional email and Teams delivery in DLP-compatible environments |
 | `CLMApp` | 1.1.0.0 packaged | Model-driven operations interface with owner, membership, notification, and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_0_0.zip`, followed by the packaged connectors, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMNotifications_1_2_0_0.zip`, and `CLMApp_1_1_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_1_0.zip`, followed by the packaged connectors, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMNotifications_1_3_0_0.zip`, and `CLMApp_1_1_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 
