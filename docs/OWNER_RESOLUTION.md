@@ -8,7 +8,7 @@ The former direct custom Owner User/Owner Team assignment model is superseded by
 
 Dataverse **Owning User** and **Owning Team** are standard platform fields used for security, access, and record ownership. They do not identify who must receive credential-renewal notifications.
 
-Notification responsibility is represented by the Credential **Notification Group** lookup. Credential retains **Owner Tag** as discovery input, but the vanilla model has no custom Owner User, Owner Team, Owner Source, or Owner Locked columns.
+Notification responsibility is represented by the Credential **Notification Group** lookup. Credential retains the source value in the **Owner Tag** column for schema compatibility. Operationally, treat this value as an **Owner Hint**: for Azure resources it can be an owner tag, while for Entra app registrations it is the first discovered application owner's UPN or email. The vanilla model has no custom Owner User, Owner Team, Owner Source, or Owner Locked columns.
 
 ## Data model
 
@@ -35,7 +35,7 @@ Where applicable, set the optional Dataverse User or Contact lookup to the corre
 `Resolve-CLMNotificationGroups` assigns exactly one active Notification Group using this order:
 
 1. **Immutable mapping** — an active Owner Mapping matches a stable credential, application, or source object identifier.
-2. **Owner Tag** — the retained discovery tag matches an active receiver email address.
+2. **Owner Hint** — the retained `clm_ownertag` value exactly matches an active receiver email address, ignoring case and surrounding spaces.
 3. **Owner Rule** — the first active, priority-ordered matching rule supplies a Notification Group.
 4. **Default triage** — the configured triage group receives anything still unresolved.
 
@@ -66,17 +66,77 @@ Create an Owner Mapping when responsibility is known and must survive renames. U
 
 For bulk onboarding:
 
-1. Export application and credential identifiers, current Entra owners, Owner Tags, and expiry dates.
+1. Export application and credential identifiers, current Entra owners, Owner Hints (`clm_ownertag`), and expiry dates.
 2. Obtain responsibility confirmation from the relevant operational teams.
 3. Create mappings for confirmed assignments.
 4. Improve Entra ownership where it is missing or stale.
 5. Leave unresolved records for the default triage group rather than creating fragile name rules.
 
+### Understand Owner Hints
+
+The `clm_ownertag` schema name is retained, but its source depends on the credential:
+
+| Source | Owner Hint value |
+|---|---|
+| Entra app registration | UPN or email of the first owner returned by Microsoft Graph |
+| Enterprise application | Not currently populated |
+| Azure Key Vault | First available `Owner`, `owner`, or `OwnerEmail` resource tag |
+
+App registrations do not support Azure resource tags. CLM therefore does not expect a tag on an app registration. If the first Entra owner has a usable email that exactly matches an active Notification Receiver, that receiver's group is selected before Owner Rules are evaluated.
+
+Applications with no owner, owners without usable email, multiple owners requiring different routing, and enterprise applications should use an immutable Owner Mapping or a stable Owner Rule.
+
 ### Configure rules
 
-Create active Owner Rules with explicit priorities and a target Notification Group. Lower priority numbers are evaluated first. Use scopes such as environment, resource group, vault name, display name, or Owner Tag only when the pattern is stable.
+Owner Rules are ordered, case-insensitive substring matches used only after immutable mappings and exact Owner Hint receiver matches fail.
 
-Do not target a Dataverse user or team. The desired rule output is a Notification Group.
+| Field | Required behavior |
+|---|---|
+| Rule Name | Human-readable purpose, such as `Payments applications` |
+| Active | Only active rules are loaded |
+| Priority | Lower numbers are evaluated first; use unique values to avoid nondeterministic ties |
+| Match Scope | Credential value to inspect |
+| Match Pattern | Case-insensitive substring; do not leave blank because an empty substring matches every value |
+| Notification Group | Group assigned when the rule wins |
+| Match Count / Last Matched On | Present for reporting, but the current resolver does not update them |
+
+The resolver loads up to 500 active rules that have a Notification Group and orders them by Priority ascending. For each unassigned, non-decommissioned, non-system credential, the first matching rule wins.
+
+#### Match scopes
+
+| Match Scope | Value evaluated | Example pattern | Example use |
+|---|---|---|---|
+| DisplayName | Credential Display Name, falling back to Name | `payments-` | Route applications with a stable naming prefix |
+| Tag | Owner Hint stored in `clm_ownertag` | `platform@contoso.com` | Route a stable owner email or Azure owner-tag value |
+| Environment | Credential Environment | `production` | Route credentials discovered in a named environment |
+| KeyVaultName | Text before the first `/` in the Key Vault credential display name | `kv-payments-prod` | Route secrets from a specific vault |
+| ResourceGroup | Resource-group segment parsed from Source Portal URL | `rg-payments-prod` | Route Azure credentials in a resource group |
+
+Patterns use `contains`, not exact match or regular expressions. Prefer a sufficiently specific value to prevent unintended matches; for example, `rg-payments-prod` is safer than `prod`.
+
+#### Precedence and persistence
+
+Rules cannot override an immutable mapping or exact Owner Hint receiver match. The resolver also evaluates only credentials whose Notification Group is empty. An existing assignment is therefore sticky: changing rule priority or pattern does not move already assigned credentials.
+
+To deliberately re-evaluate a credential:
+
+1. Confirm no immutable Owner Mapping or exact Owner Hint receiver should take precedence.
+2. Clear the Credential's Notification Group.
+3. Run `Resolve-CLMNotificationGroups`.
+4. Verify the resulting group and the `NotificationGroupResolved` Renewal Event.
+
+#### Test a rule safely
+
+1. Keep the production rule inactive while drafting it.
+2. Select a unique priority and confirm no active rule uses the same value.
+3. Inspect representative Credential values for the selected scope.
+4. Test with a narrow pattern in a non-production environment or against a controlled unassigned credential.
+5. Confirm the expected Notification Group and `OwnerRule` resolution source in the Renewal Event.
+6. Test at least one near-match that must not be assigned.
+7. Activate the production rule only after both the positive and negative cases pass.
+8. Review **Orphans (No Notification Group)** after the next resolver run.
+
+Do not target a Dataverse user or team. The rule output is always a Notification Group.
 
 ### Configure default triage
 
@@ -120,3 +180,5 @@ The current queue permanently excludes only **Decommissioned**. **In Renewal** a
 - Environments that block Outlook or Teams with Dataverse can use resolution and queueing but must not enable the corresponding dispatcher.
 - The dispatcher flows require the CLM queue data in the same DLP-compatible environment. Cross-environment delivery requires an approved external broker.
 - Older environments may still contain legacy owner columns or rules and require environment-specific cleanup; those components are not part of the desired vanilla model.
+- The resolver does not currently update Owner Rule Match Count or Last Matched On.
+- Equal rule priorities do not have a guaranteed secondary ordering.
