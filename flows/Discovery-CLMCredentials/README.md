@@ -14,11 +14,11 @@
 
 ### Entra applications
 
-The Graph leg pages through applications, reads the first owner, and processes password and certificate credentials. The owner's UPN or email is stored as `clm_ownertag`.
+The Graph leg pages through applications, reads the first owner, and processes password and certificate credentials. App registrations do not support Azure resource tags, so the owner's UPN or email is stored in `clm_ownertag` as an Owner Hint.
 
 ### Enterprise applications
 
-The enterprise-application leg pages through service principals and processes their certificate credentials. It does not currently populate an Owner Tag.
+The enterprise-application leg pages through service principals and processes their certificate credentials. It does not currently populate an Owner Hint.
 
 ### Azure and Key Vault
 
@@ -50,7 +50,7 @@ The flow reads or writes fields including:
 
 The flow initializes `DiscoveryRunId`, but the reviewed export does not create or update a `clm_discoveryrun` row. Run-level audit records therefore require a future flow revision.
 
-The flow captures Owner Tag hints but does not resolve them to Dataverse Owner User or Owner Team lookups. See [`docs/OWNER_RESOLUTION.md`](../../docs/OWNER_RESOLUTION.md).
+The flow captures Owner Hints in the `clm_ownertag` compatibility column but does not resolve them to Dataverse Owner User or Owner Team lookups. See [`docs/OWNER_RESOLUTION.md`](../../docs/OWNER_RESOLUTION.md).
 
 ## Install
 

@@ -28,7 +28,7 @@ The vanilla model includes the established discovery and lifecycle tables plus:
 | Owner Mapping (`clm_ownermapping`) | Immutable source identifier mapped to a Notification Group |
 | Notification Delivery (`clm_notificationdelivery`) | Per-receiver notification audit record |
 
-Credential has a Notification Group lookup and retains Owner Tag as resolution input. It does not have custom Owner User, Owner Team, Owner Source, or Owner Locked columns in the desired vanilla model.
+Credential has a Notification Group lookup and retains `clm_ownertag` as an Owner Hint resolution input. For Entra app registrations this is the first discovered owner's UPN or email; for Azure resources it can be an owner tag. It does not have custom Owner User, Owner Team, Owner Source, or Owner Locked columns in the desired vanilla model.
 
 Owner Rule conceptually targets a Notification Group. Legacy assignment fields that remain in an upgraded environment are cleanup residue, not part of this architecture.
 
@@ -48,7 +48,7 @@ A Notification Group can fan out to multiple receivers, allowing a shared mailbo
 `Resolve-CLMNotificationGroups` uses this fixed precedence:
 
 1. Immutable Owner Mapping
-2. Owner Tag receiver match
+2. Owner Hint receiver match
 3. Owner Rule
 4. Default triage group
 

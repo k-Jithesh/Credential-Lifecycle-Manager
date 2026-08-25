@@ -23,7 +23,7 @@ CLM separates Dataverse record ownership from notification responsibility.
 Resolution uses this precedence:
 
 1. Immutable Owner Mapping
-2. Owner Tag matched to an active receiver email
+2. Owner Hint matched to an active receiver email
 3. Owner Rule
 4. Default triage group
 
