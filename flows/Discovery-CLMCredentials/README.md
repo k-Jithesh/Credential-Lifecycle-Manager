@@ -18,7 +18,7 @@ The Graph leg pages through applications and processes password and certificate 
 
 ### Enterprise applications
 
-The enterprise-application leg pages through service principals and processes their certificate credentials. It does not currently populate Credential Owner rows, so these credentials require an Owner Mapping or Owner Rule.
+The enterprise-application leg pages through service principals and processes their secret and certificate credentials. It does not currently populate Credential Owner rows, so these credentials require an Owner Mapping or Owner Rule.
 
 ### Azure and Key Vault
 

@@ -4,7 +4,7 @@ Credential Lifecycle Manager (CLM) helps organizations find and manage credentia
 
 CLM can:
 
-- Discover application secrets, certificates, enterprise application certificates, and Key Vault secrets.
+- Discover App Registration secrets and certificates, Enterprise Application secrets and certificates, and Key Vault secret metadata.
 - Track credential owners, expiry dates, source environments, and renewal activity.
 - Highlight discovery failures and coverage gaps.
 - Route renewal notifications to responsible operational groups.
@@ -30,9 +30,11 @@ Resolution uses this precedence:
 
 ## Install
 
-Use Power Platform solution import for deployment. See:
+Use Power Platform solution import for deployment. New administrators should start with the end-to-end adoption guide:
 
-**[Install CLM](docs/INSTALL.md)**
+**[Start the CLM adoption guide](docs/guide/README.md)**
+
+It includes a 15-minute quick start, clean installation, identity and access, discovery, owner routing, notifications, daily operations, and symptom-based troubleshooting.
 
 The data foundation is `CLMTables 1.3.1.0`. `CLMNotifications 1.3.0.0` resolves Notification Groups, maintains imported membership names, and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
 
@@ -51,8 +53,9 @@ The core notification flows use only the Dataverse connector so they remain comp
 
 ## More information
 
+- [Adoption guide](docs/guide/README.md)
 - [Solution architecture](docs/SOLUTION_ARCHITECTURE.md)
-- [Installation](docs/INSTALL.md)
+- [Advanced installation reference](docs/INSTALL.md)
 - [Notification responsibility resolution](docs/OWNER_RESOLUTION.md)
 - [Custom connector setup](docs/CUSTOM_CONNECTORS.md)
 - [Access and coverage](docs/RBAC_AND_COVERAGE.md)
