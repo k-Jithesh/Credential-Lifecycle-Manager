@@ -60,6 +60,8 @@ After resolution, `Queue-CLMCredentialNotifications` evaluates the Reminder Days
 
 `Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently every five minutes. Each processes up to 100 oldest Pending or Retrying records for its channel, sends through its dedicated connector, and updates the delivery record to Sent or Failed.
 
+The reusable-receiver redesign does not require a dispatcher package change. Dispatchers consume Notification Delivery records that already identify the target Credential and Notification Receiver; group-membership expansion occurs earlier in `Queue-CLMCredentialNotifications`.
+
 ## Solution inventory and readiness
 
 | Solution | Version or state | Responsibility |

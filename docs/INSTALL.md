@@ -118,7 +118,7 @@ Do not enable a dispatcher until its connection is owned by an approved service 
 11. Run `Queue-CLMCredentialNotifications`, then review Notification Delivery records.
 12. In a DLP-compatible environment, enable the required dispatcher and confirm delivery rows move from Pending to Sent.
 
-When a recipient starts renewal, set the Credential to **In Renewal**, add its **Renewal Ticket URL**, and set **Suppressed Until** to the next follow-up date. See [Notification responsibility resolution](OWNER_RESOLUTION.md) for reminder-bucket and suppression behavior.
+When a recipient starts renewal, set the Credential to **In Renewal**, add its **Renewal Ticket URL**, and set **Suppressed Until** to the next follow-up date. After renewal, run discovery, mark a replaced Credential **Decommissioned**, and mark its existing Pending or Retrying deliveries **Skipped**. See [Notification responsibility resolution](OWNER_RESOLUTION.md) for the complete procedure.
 
 ## Access
 

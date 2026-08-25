@@ -171,7 +171,7 @@ The daily queue creates one delivery per receiver and channel when a credential 
 
 Dispatch uses at-least-once delivery semantics. If a provider accepts a message but the subsequent Dataverse status update fails, an operator retry can deliver the message again. Review provider history before retrying ambiguous failures. A receiver deactivated after queueing is not contacted; its delivery is marked Skipped.
 
-## Record renewal action and pause reminders
+## Pause reminders during renewal
 
 When remediation starts:
 
@@ -181,7 +181,19 @@ When remediation starts:
 
 The queue ignores the credential while `Suppressed Until` is in the future. When that time passes, CLM evaluates the credential again and queues the reminder for its current bucket; it does not backfill every bucket crossed during suppression.
 
-Completing the work in the source system should result in discovery recording the new expiry date. Once **Days Until Expiry** is greater than 90, the credential naturally leaves the notification window. Set **Decommissioned** only when the credential is permanently retired.
+## Stop alerts after renewal
+
+After rotating or renewing a certificate, secret, or key:
+
+1. Complete the change in Entra ID, Key Vault, or the originating system.
+2. Run `Discovery-CLMCredentials`, or wait for its next scheduled run.
+3. Confirm that CLM shows the replacement credential or the updated expiry date.
+4. If discovery updated the same Credential and **Days Until Expiry** is greater than 90, no further queue records are created for it.
+5. If rotation created a new Credential record, set the replaced Credential's **Status** to **Decommissioned**. This permanently excludes the old record from resolution and future queueing.
+6. Open Notification Deliveries for the replaced Credential. Change any existing **Pending** or **Retrying** deliveries to **Skipped** so a dispatcher cannot send alerts that were queued before renewal completed.
+7. Set the replacement Credential to the appropriate active status and clear any obsolete **Suppressed Until** or renewal-ticket values after confirming the new expiry.
+
+Do not deactivate a shared Notification Receiver to stop alerts for one credential. The receiver may participate in multiple Notification Groups.
 
 The current queue permanently excludes only **Decommissioned**. **In Renewal** and **Renewed** are tracking states and do not stop notifications by themselves. `Suppressed Until` is therefore the temporary acknowledgement and pause control. CLM does not currently send a separate “action taken” confirmation message; operators review Status, Renewal Ticket URL, Suppressed Until, and Notification Delivery history in the app.
 
