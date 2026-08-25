@@ -44,7 +44,7 @@ The core notification flows use only the Dataverse connector so they remain comp
 |---|---|---|
 | `CLMTables 1.3.0.0` | Dataverse tables, reusable receiver memberships, discovered owners, choices, relationships, roles, and curated public views | Packaged |
 | `clmPlatformOps 1.1.0.0` | Graph and Azure custom connectors with paged application-owner discovery | Packaged |
-| `CLMDiscoveryFlow 1.1.0.1` | Daily credential and all-owner discovery | Packaged |
+| `CLMDiscoveryFlow 1.1.0.2` | Daily credential and all-owner discovery | Packaged |
 | `CLMNotifications 1.2.0.0` | Multi-owner group resolution, per-group reminder scheduling, and delivery queue audit | Packaged |
 | `CLMNotificationDispatchers 1.0.0.0` | Optional email and Teams delivery from queued records | Packaged |
 | `CLMApp 1.1.0.0` | Model-driven operations app with owner, membership, notification, and audit pages | Packaged |

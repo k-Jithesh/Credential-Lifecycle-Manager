@@ -10,7 +10,7 @@ The deployment packages are:
 
 - `CLMTables_1_3_0_0.zip`
 - `clmPlatformOps_1_1_0_0.zip`
-- `CLMDiscoveryFlow_1_1_0_1.zip`
+- `CLMDiscoveryFlow_1_1_0_2.zip`
 - `CLMNotifications_1_2_0_0.zip`
 - `CLMNotificationDispatchers_1_0_0_0.zip` (optional; requires compatible DLP)
 - `CLMApp_1_1_0_0.zip`
@@ -53,7 +53,7 @@ The connectors contain neutral OAuth placeholders. Follow [Custom connector setu
 
 ### 3. Import the discovery flow
 
-Import `CLMDiscoveryFlow_1_1_0_1.zip`.
+Import `CLMDiscoveryFlow_1_1_0_2.zip`.
 
 During import, map:
 

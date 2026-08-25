@@ -66,13 +66,13 @@ After resolution, `Queue-CLMCredentialNotifications` evaluates the Reminder Days
 |---|---|---|
 | `CLMTables` | 1.3.0.0 packaged | Tables, reusable memberships, all-owner records, choices, relationships, roles, schedules, and public views |
 | `clmPlatformOps` | 1.1.0.0 packaged | Graph and Azure custom connectors, including paged application-owner discovery |
-| `CLMDiscoveryFlow` | 1.1.0.1 packaged | Daily credential and all-owner discovery |
+| `CLMDiscoveryFlow` | 1.1.0.2 packaged | Daily credential and all-owner discovery |
 | `CLMNotifications` | 1.2.0.0 packaged | Multi-owner group resolution, per-group reminder evaluation, deduplicated queueing, and delivery audit |
 | `CLMNotificationDispatchers` | 1.0.0.0 packaged | Optional email and Teams delivery in DLP-compatible environments |
 | `CLMApp` | 1.1.0.0 packaged | Model-driven operations interface with owner, membership, notification, and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_0_0.zip`, followed by the packaged connectors, `CLMDiscoveryFlow_1_1_0_1.zip`, `CLMNotifications_1_2_0_0.zip`, and `CLMApp_1_1_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_0_0.zip`, followed by the packaged connectors, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMNotifications_1_2_0_0.zip`, and `CLMApp_1_1_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 

@@ -1,6 +1,6 @@
 # Discovery-CLMCredentials
 
-`Discovery-CLMCredentials` is the cloud flow exported in `CLMDiscoveryFlow 1.1.0.1`.
+`Discovery-CLMCredentials` is the cloud flow exported in `CLMDiscoveryFlow 1.1.0.2`.
 
 ## Schedule and connections
 
@@ -57,4 +57,4 @@ Application owners are notification-routing inputs, not Dataverse record owners.
 
 Follow [`docs/INSTALL.md`](../../docs/INSTALL.md). Normal deployment uses solution import and does not require PowerShell.
 
-The checked-in `definition.json` and `manifest.json` predate the current release package. Treat `CLMDiscoveryFlow 1.1.0.1` as authoritative until the source tree is refreshed from that package.
+The checked-in `definition.json` and `manifest.json` predate the current release package. Treat `CLMDiscoveryFlow 1.1.0.2` as authoritative until the source tree is refreshed from that package.
