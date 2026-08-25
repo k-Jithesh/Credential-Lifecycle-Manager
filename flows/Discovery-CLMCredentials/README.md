@@ -44,7 +44,7 @@ The flow reads or writes fields including:
 - Coverage-gap detection, HTTP/error detail, resolution hint, and failure count
 - Renewal-event action, occurrence time, payload, and flow-actor flag
 
-`CLMTables 1.2.2.0` must be imported before this solution.
+`CLMTables 1.2.3.0` must be imported before this solution.
 
 ## Current limitation
 
