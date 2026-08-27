@@ -8,7 +8,7 @@ CLM uses modular Power Platform solutions and an Azure Action Group-style notifi
 CLMTables 1.3.1.0
    ├── CLMDiscoveryFlow
    ├── CLMNotifications 1.3.0.0
-   ├── CLMNotificationDispatchers 1.0.0.0 (optional)
+   ├── CLMNotificationDispatchers 1.1.0.0 (optional)
    └── CLMApp
 
 clmPlatformOps
@@ -60,11 +60,11 @@ Discovery stores every Graph owner for each Entra application credential. The re
 
 After resolution, `Queue-CLMCredentialNotifications` evaluates the Reminder Days selected by the assigned Notification Group and creates one deduplicated Notification Delivery record per active membership receiver and channel at each enabled threshold. Delivery records preserve the credential, group, receiver, channel, queue state, time, and diagnostic details.
 
-`Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently every five minutes. Each processes up to 100 oldest Pending or Retrying records for its channel, sends through its dedicated connector, and updates the delivery record to Sent or Failed.
+`Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently at 08:00 and 16:00 Australian Eastern time. Each takes up to 100 oldest Pending or Retrying records for its channel, groups them by receiver, and sends one digest per receiver through its dedicated connector. Every included Delivery row remains separate and is updated to Sent with a shared dispatch identifier, or to Failed while preserving its retry count. The daily queue creates the next Retrying row and increments that count. Teams uses the provider message ID; email uses the Power Automate run ID because Send an email (V2) does not return a message ID.
 
 The Teams dispatcher posts through the Teams connector as the Flow bot. It is supported only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the destination.
 
-The reusable-receiver redesign does not require a dispatcher package change. Dispatchers consume Notification Delivery records that already identify the target Credential and Notification Receiver; group-membership expansion occurs earlier in `Queue-CLMCredentialNotifications`.
+Dispatchers consume Notification Delivery records that already identify the target Credential, Notification Group, and Notification Receiver; group-membership expansion occurs earlier in `Queue-CLMCredentialNotifications`. Digest grouping therefore changes message presentation without removing per-credential audit records.
 
 ## Solution inventory and readiness
 
@@ -74,11 +74,11 @@ The reusable-receiver redesign does not require a dispatcher package change. Dis
 | `clmPlatformOps` | 1.1.0.0 packaged | Graph and Azure custom connectors, including paged application-owner discovery |
 | `CLMDiscoveryFlow` | 1.1.0.2 packaged | Daily credential and all-owner discovery |
 | `CLMNotifications` | 1.3.0.0 packaged | Multi-owner group resolution, imported membership naming, per-group reminder evaluation, deduplicated queueing, and delivery audit |
-| `CLMNotificationDispatchers` | 1.0.0.0 packaged | Optional email and Teams delivery in DLP-compatible environments |
+| `CLMNotificationDispatchers` | 1.1.0.0 packaged | Optional twice-daily, receiver-grouped email and Teams digests in DLP-compatible environments |
 | `CLMApp` | 1.1.0.0 packaged | Model-driven operations interface with owner, membership, notification, and audit pages |
 ## Installation
 
-Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_1_0.zip`, followed by `clmPlatformOps_1_1_0_0.zip`, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMApp_1_1_0_0.zip`, and `CLMNotifications_1_3_0_0.zip`. Install `CLMNotificationDispatchers_1_0_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
+Normal deployment uses solution import. Clean installs start with `CLMTables_1_3_1_0.zip`, followed by `clmPlatformOps_1_1_0_0.zip`, `CLMDiscoveryFlow_1_1_0_2.zip`, `CLMApp_1_1_0_0.zip`, and `CLMNotifications_1_3_0_0.zip`. Install `CLMNotificationDispatchers_1_1_0_0.zip` only where Dataverse, Outlook, and Teams are permitted together.
 
 See [`INSTALL.md`](INSTALL.md) for the precise readiness caveats and order.
 

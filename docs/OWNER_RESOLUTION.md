@@ -167,11 +167,11 @@ Review the triage queue regularly and replace repeated fallback assignments with
 - What provider response or error was recorded?
 - Does a retry or receiver correction remain necessary?
 
-One notification event can produce multiple delivery records when a group has multiple receivers. The optional `CLMNotificationDispatchers` solution provides separate email and Teams flows that process Pending or Retrying records, then record Sent or Failed with attempt details.
+One notification event can produce multiple delivery records when a group has multiple receivers. The optional `CLMNotificationDispatchers` solution provides separate email and Teams flows. At 08:00 and 16:00 Australian Eastern time, each flow takes up to 100 Pending or Retrying rows for its channel and sends one digest per receiver. The digest identifies the Notification Group for every credential while the underlying Delivery rows remain separate.
 
 The daily queue creates one delivery per receiver and channel when a credential first enters a Reminder Day selected by its Notification Group. Supported thresholds are 90 days, 60 days, 30 days, 7 days, and expiry day. Deduplication prevents daily repeats inside a bucket. The queue does not create a new overdue bucket after the expiry-day threshold has passed.
 
-Dispatch uses at-least-once delivery semantics. If a provider accepts a message but the subsequent Dataverse status update fails, an operator retry can deliver the message again. Review provider history before retrying ambiguous failures. A receiver deactivated after queueing is not contacted; its delivery is marked Skipped.
+Dispatch uses at-least-once delivery semantics. All rows included in a successful digest receive the same dispatch identifier. If digest preparation or sending fails, every row in that receiver batch is marked Failed while preserving its retry count; the daily queue increments the count when it creates the next Retrying row. If a provider accepts a digest but the subsequent Dataverse status updates fail, an operator retry can deliver the complete digest again. Review provider history before retrying ambiguous failures and retry the intended batch together. A receiver deactivated after queueing is not contacted; all of its selected deliveries are marked Skipped.
 
 ## Pause reminders during renewal
 

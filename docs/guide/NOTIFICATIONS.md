@@ -8,7 +8,7 @@ Use this page if you want reusable destinations, reminder schedules, auditable q
 
 - `CLMNotifications 1.3.0.0`.
 - Active Notification Groups and Receivers.
-- A DLP decision before enabling `CLMNotificationDispatchers 1.0.0.0`.
+- A DLP decision before enabling `CLMNotificationDispatchers 1.1.0.0`.
 - Approved service-account connections for any dispatcher.
 
 > **Teams requirement:** CLM posts Teams notifications as the Flow bot. Teams notification delivery works only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the target Team/channel. CLM does not currently provide an alternate Teams delivery mechanism.
@@ -63,7 +63,7 @@ At each enabled threshold, CLM creates one deduplicated record per credential, r
 4. Enable `Dispatch-CLMTeamsNotifications`.
 5. Test a controlled queued Teams delivery.
 
-Dispatchers run independently every five minutes. Each takes up to 100 oldest Pending or Retrying records for its channel and records Sent or Failed.
+Dispatchers run independently at 08:00 and 16:00 Australian Eastern time. Each takes up to 100 oldest Pending or Retrying records for its channel, groups them by receiver, and sends one digest per receiver. Every credential remains visible as its own Notification Delivery row.
 
 ### Test end to end
 
@@ -71,10 +71,10 @@ Dispatchers run independently every five minutes. Each takes up to 100 oldest Pe
 2. Assign its test Notification Group.
 3. Choose a reminder threshold that the credential currently enters.
 4. Run queueing.
-5. Confirm the expected receiver/channel delivery row is **Pending**.
+5. Confirm the expected receiver/channel delivery row is **Pending**. Queue several controlled credentials for the same receiver to test digest grouping.
 6. Run or wait for the applicable dispatcher.
-7. Confirm the destination received the message and the row is **Sent**.
-8. Review provider history before retrying an ambiguous failure; dispatch is at-least-once and a retry can duplicate a message.
+7. Confirm the destination received one digest containing every controlled credential and that each included row is **Sent**.
+8. Review provider history before retrying an ambiguous failure. A receiver-level failure marks every row in that digest **Failed**; retry the intended batch together because dispatch is at-least-once and can duplicate the complete digest.
 
 ## Example values
 
@@ -85,7 +85,7 @@ Dispatchers run independently every five minutes. Each takes up to 100 oldest Pe
 
 ## Expected result
 
-The daily queue creates auditable, deduplicated records only at the group's selected thresholds. Approved dispatchers convert Pending records to Sent or Failed.
+The daily queue creates auditable, deduplicated records only at the group's selected thresholds. Approved dispatchers consolidate those rows into twice-daily receiver digests and convert every included row to Sent or Failed.
 
 ## Common problems
 
@@ -95,6 +95,7 @@ The daily queue creates auditable, deduplicated records only at the group's sele
 - **Teams delivery fails with a bot or roster error:** confirm the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the target Team/channel.
 - **A deactivated receiver was already queued:** the dispatcher marks its delivery Skipped.
 - **One person receives from several groups:** receivers are intentionally reusable; review memberships.
+- **A digest contains only some queued items:** each channel run is capped at the 100 oldest eligible Delivery rows; remaining rows wait for the next run.
 
 ## Technical reference
 

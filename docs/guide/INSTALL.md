@@ -23,7 +23,7 @@ Use this page if you want a clean deployment from the packaged solutions in this
 | `CLMDiscoveryFlow_1_1_0_2.zip` | Yes |
 | `CLMApp_1_1_0_0.zip` | Yes |
 | `CLMNotifications_1_3_0_0.zip` | Yes |
-| `CLMNotificationDispatchers_1_0_0_0.zip` | Optional; DLP-dependent |
+| `CLMNotificationDispatchers_1_1_0_0.zip` | Optional; DLP-dependent |
 
 ## Steps
 
@@ -77,13 +77,13 @@ Enable:
 
 ### 7. Optionally import dispatchers
 
-Only if DLP permits Dataverse with the required outbound connector, import `CLMNotificationDispatchers_1_0_0_0.zip`. Map:
+Only if DLP permits Dataverse with the required outbound connector, import `CLMNotificationDispatchers_1_1_0_0.zip`. Map:
 
 - `clm_sharedcommondataserviceforapps_dispatchers` to Dataverse in this CLM environment.
 - `clm_sharedoffice365_clmnotifications` to the approved sending mailbox connection.
 - `clm_sharedteams_clmnotifications` to the approved Teams connection.
 
-Enable email and Teams dispatchers independently. Each runs every five minutes and processes up to 100 oldest Pending or Retrying deliveries sequentially.
+Enable email and Teams dispatchers independently. Each runs at 08:00 and 16:00 Australian Eastern time, takes up to 100 oldest Pending or Retrying deliveries, and sends one digest per receiver. Individual Delivery rows remain available for audit and retry.
 
 > **Teams requirement:** the packaged Teams dispatcher posts as the Flow bot. Teams notifications work only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the destination Team/channel. Do not enable the Teams dispatcher where this requirement cannot be met.
 

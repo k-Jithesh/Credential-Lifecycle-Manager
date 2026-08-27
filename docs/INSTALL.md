@@ -12,7 +12,7 @@ The deployment packages are:
 - `clmPlatformOps_1_1_0_0.zip`
 - `CLMDiscoveryFlow_1_1_0_2.zip`
 - `CLMNotifications_1_3_0_0.zip`
-- `CLMNotificationDispatchers_1_0_0_0.zip` (optional; requires compatible DLP)
+- `CLMNotificationDispatchers_1_1_0_0.zip` (optional; requires compatible DLP)
 - `CLMApp_1_1_0_0.zip`
 
 ## Before you start
@@ -85,7 +85,7 @@ The queue flow is intentionally Dataverse-only.
 
 ### 6. Import notification dispatchers where permitted
 
-Import `CLMNotificationDispatchers_1_0_0_0.zip` only into a CLM environment whose DLP policy permits Dataverse with Office 365 Outlook and Microsoft Teams. The dispatchers use the current environment's CLM tables; installing them in a separate environment without the same CLM data will not process the source queue.
+Import `CLMNotificationDispatchers_1_1_0_0.zip` only into a CLM environment whose DLP policy permits Dataverse with Office 365 Outlook and Microsoft Teams. The dispatchers use the current environment's CLM tables; installing them in a separate environment without the same CLM data will not process the source queue.
 
 > **Teams requirement:** `Dispatch-CLMTeamsNotifications` posts as the Flow bot. Teams notifications work only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the target Team/channel. Keep the Teams dispatcher disabled where this requirement cannot be met.
 
@@ -101,10 +101,10 @@ Enable the flows independently:
 
 | Flow | Default schedule | Purpose |
 |---|---|---|
-| `Dispatch-CLMEmailNotifications` | Every 5 minutes | Sends Pending/Retrying Email deliveries and records Sent or Failed |
-| `Dispatch-CLMTeamsNotifications` | Every 5 minutes | Posts Pending/Retrying Teams deliveries and records Sent or Failed |
+| `Dispatch-CLMEmailNotifications` | 08:00 and 16:00 Australian Eastern time | Sends one digest per email receiver and records each included delivery as Sent or Failed |
+| `Dispatch-CLMTeamsNotifications` | 08:00 and 16:00 Australian Eastern time | Posts one digest per Teams receiver and records each included delivery as Sent or Failed |
 
-Do not enable a dispatcher until its connection is owned by an approved service account. Each run processes up to 100 oldest matching records sequentially.
+Do not enable a dispatcher until its connection is owned by an approved service account. Each run takes up to 100 oldest matching delivery records, groups them by receiver, and sends one digest per receiver. Every Delivery row remains separate for audit and retry. A receiver-level preparation or send failure marks every included row Failed. The daily queue creates the next Retrying row and increments its retry count.
 
 ## Initial configuration
 
