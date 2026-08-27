@@ -94,7 +94,8 @@ Blank Reminder Days enables all five thresholds; it does not disable reminders.
 1. Confirm the channel's dispatcher is installed and enabled.
 2. Validate its Dataverse and provider connections.
 3. Confirm DLP permits Dataverse with Outlook or Teams.
-4. Confirm the dispatcher is in the same CLM data environment.
+4. For Teams, confirm the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the target Team/channel.
+5. Confirm the dispatcher is in the same CLM data environment.
 
 ### A delivery is Failed
 

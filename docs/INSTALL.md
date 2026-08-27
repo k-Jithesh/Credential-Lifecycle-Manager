@@ -87,6 +87,8 @@ The queue flow is intentionally Dataverse-only.
 
 Import `CLMNotificationDispatchers_1_0_0_0.zip` only into a CLM environment whose DLP policy permits Dataverse with Office 365 Outlook and Microsoft Teams. The dispatchers use the current environment's CLM tables; installing them in a separate environment without the same CLM data will not process the source queue.
 
+> **Teams requirement:** `Dispatch-CLMTeamsNotifications` posts as the Flow bot. Teams notifications work only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the target Team/channel. Keep the Teams dispatcher disabled where this requirement cannot be met.
+
 During import, map:
 
 | Connection reference | Select |
@@ -141,6 +143,6 @@ Assign users an included role appropriate to their duties:
 | Notification flow import asks for a missing connection | Map the packaged connection references |
 | Credential has no Notification Group | Check immutable mapping, Owner Tag receiver match, rules, then default triage |
 | No delivery records appear | Queue flow status, credential expiry window, receiver activation, and flow run history |
-| Delivery records remain Pending | Confirm the matching dispatcher is enabled, its connections are valid, and DLP permits the connector combination |
+| Delivery records remain Pending | Confirm the matching dispatcher is enabled, its connections are valid, DLP permits the connector combination, and Teams Workflows/Flow bot is enabled for Teams deliveries |
 | Delivery record becomes Failed | Review Error Detail, correct the receiver or connection, then change the row to Retrying |
 | No credentials appear | Discovery flow run history, then Coverage Gaps |

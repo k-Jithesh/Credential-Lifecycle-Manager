@@ -34,7 +34,7 @@ Use this after a platform administrator has completed the [clean installation](I
 8. Review **Credentials**, **Credential Owners**, and **Coverage Gaps**.
 9. Run `Resolve-CLMNotificationGroups`; confirm credentials have a Notification Group.
 10. Run `Queue-CLMCredentialNotifications`; inspect Notification Deliveries.
-11. If dispatchers are installed and permitted by DLP, enable one dispatcher and verify a controlled delivery changes from **Pending** to **Sent**.
+11. If dispatchers are installed and permitted by DLP, enable one dispatcher and verify a controlled delivery changes from **Pending** to **Sent**. Teams delivery additionally requires the Teams Workflows (Power Automate) app and Flow bot to be enabled and allowed.
 
 This establishes safe fallback routing first. Add [owner mappings and rules](OWNER_ROUTING.md) after discovery shows the identifiers and naming patterns in your environment.
 
@@ -47,7 +47,7 @@ This establishes safe fallback routing first. Add [owner mappings and rules](OWN
 - Records discovery failures as Coverage Gaps.
 - Resolves one Notification Group through mappings, discovered owners, rules, then default triage.
 - Queues auditable, deduplicated email and Teams deliveries.
-- Optionally dispatches queued messages where Power Platform DLP permits it.
+- Optionally dispatches queued messages where Power Platform DLP permits it. Teams messages require the Teams Workflows (Power Automate) app and Flow bot to be enabled and allowed.
 
 CLM does not currently populate owners for Enterprise Application credentials or create complete Discovery Run audit records.
 

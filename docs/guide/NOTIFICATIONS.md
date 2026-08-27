@@ -11,6 +11,8 @@ Use this page if you want reusable destinations, reminder schedules, auditable q
 - A DLP decision before enabling `CLMNotificationDispatchers 1.0.0.0`.
 - Approved service-account connections for any dispatcher.
 
+> **Teams requirement:** CLM posts Teams notifications as the Flow bot. Teams notification delivery works only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the target Team/channel. CLM does not currently provide an alternate Teams delivery mechanism.
+
 ## Steps
 
 ### Create groups, receivers, and memberships
@@ -55,7 +57,7 @@ At each enabled threshold, CLM creates one deduplicated record per credential, r
 
 ### Configure Teams delivery
 
-1. Confirm DLP permits Dataverse with Microsoft Teams.
+1. Confirm DLP permits Dataverse with Microsoft Teams and that the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the destination.
 2. Map the dispatcher Dataverse connection to the CLM environment.
 3. Map `clm_sharedteams_clmnotifications` to an approved Teams connection with access to the destination.
 4. Enable `Dispatch-CLMTeamsNotifications`.
@@ -90,6 +92,7 @@ The daily queue creates auditable, deduplicated records only at the group's sele
 - **Unexpected 90-day or expiry delivery:** Reminder Days is blank, which enables all thresholds.
 - **No delivery record:** check group assignment, threshold, active membership/receiver, suppression, decommissioning, and queue history.
 - **Pending never changes:** enable the matching dispatcher and validate its connection and DLP.
+- **Teams delivery fails with a bot or roster error:** confirm the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the target Team/channel.
 - **A deactivated receiver was already queued:** the dispatcher marks its delivery Skipped.
 - **One person receives from several groups:** receivers are intentionally reusable; review memberships.
 
