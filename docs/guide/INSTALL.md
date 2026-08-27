@@ -85,6 +85,8 @@ Only if DLP permits Dataverse with the required outbound connector, import `CLMN
 
 Enable email and Teams dispatchers independently. Each runs every five minutes and processes up to 100 oldest Pending or Retrying deliveries sequentially.
 
+> **Teams requirement:** the packaged Teams dispatcher posts as the Flow bot. Teams notifications work only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed by Teams administration and the destination Team/channel. Do not enable the Teams dispatcher where this requirement cannot be met.
+
 ### 8. Complete initial configuration
 
 1. Assign users `CLM Reader`, `CLM Owner`, or `CLM Platform Ops` as appropriate.

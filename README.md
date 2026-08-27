@@ -38,7 +38,7 @@ It includes a 15-minute quick start, clean installation, identity and access, di
 
 The data foundation is `CLMTables 1.3.1.0`. `CLMNotifications 1.3.0.0` resolves Notification Groups, maintains imported membership names, and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
 
-The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse.
+The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse. Teams delivery posts as the Flow bot and works only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed.
 
 ## Solution responsibilities
 

@@ -67,7 +67,7 @@ The Dataverse flow connection needs read/write access to the CLM records it mana
 Resolution and queueing use Dataverse only. Email dispatch additionally uses Office 365 Outlook; Teams dispatch additionally uses Microsoft Teams.
 
 - If DLP allows Dataverse with Outlook, enable email dispatch.
-- If DLP allows Dataverse with Teams, enable Teams dispatch.
+- If DLP allows Dataverse with Teams, enable Teams dispatch only after confirming that the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the destination.
 - If either combination is blocked, keep that dispatcher disabled.
 - Installing dispatchers in a separate environment does not process the source queue because dispatchers use the current environment's CLM tables.
 - Use an approved external broker for cross-environment delivery.

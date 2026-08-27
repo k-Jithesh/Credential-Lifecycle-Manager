@@ -62,6 +62,8 @@ After resolution, `Queue-CLMCredentialNotifications` evaluates the Reminder Days
 
 `Dispatch-CLMEmailNotifications` and `Dispatch-CLMTeamsNotifications` run independently every five minutes. Each processes up to 100 oldest Pending or Retrying records for its channel, sends through its dedicated connector, and updates the delivery record to Sent or Failed.
 
+The Teams dispatcher posts through the Teams connector as the Flow bot. It is supported only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed for the destination.
+
 The reusable-receiver redesign does not require a dispatcher package change. Dispatchers consume Notification Delivery records that already identify the target Credential and Notification Receiver; group-membership expansion occurs earlier in `Queue-CLMCredentialNotifications`.
 
 ## Solution inventory and readiness
