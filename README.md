@@ -38,7 +38,7 @@ It includes a 15-minute quick start, clean installation, identity and access, di
 
 The data foundation is `CLMTables 1.3.1.0`. `CLMNotifications 1.3.0.0` resolves Notification Groups, maintains imported membership names, and creates deduplicated Notification Delivery queue records. Each Notification Group can select its own 90, 60, 30, 7, and expiry-day reminder schedule.
 
-The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.0.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse. Teams delivery posts as the Flow bot and works only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed.
+The core notification flows use only the Dataverse connector so they remain compliant with restrictive Power Platform DLP policies. `CLMNotificationDispatchers 1.1.0.0` is an optional solution with separate email and Teams dispatch flows for environments whose DLP policy permits those connectors with Dataverse. Each flow sends one digest per receiver at 08:00 and 16:00 Australian Eastern time while retaining individual delivery records for audit and retry. Teams delivery posts as the Flow bot and works only where the Teams Workflows (Power Automate) app and Flow bot are enabled and allowed.
 
 ## Solution responsibilities
 
@@ -48,7 +48,7 @@ The core notification flows use only the Dataverse connector so they remain comp
 | `clmPlatformOps 1.1.0.0` | Graph and Azure custom connectors with paged application-owner discovery | Packaged |
 | `CLMDiscoveryFlow 1.1.0.2` | Daily credential and all-owner discovery | Packaged |
 | `CLMNotifications 1.3.0.0` | Multi-owner group resolution, imported membership naming, per-group reminder scheduling, and delivery queue audit | Packaged |
-| `CLMNotificationDispatchers 1.0.0.0` | Optional email and Teams delivery from queued records | Packaged |
+| `CLMNotificationDispatchers 1.1.0.0` | Optional twice-daily email and Teams digests from queued records | Packaged |
 | `CLMApp 1.1.0.0` | Model-driven operations app with owner, membership, notification, and audit pages | Packaged |
 
 ## More information

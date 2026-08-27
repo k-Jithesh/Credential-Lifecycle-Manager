@@ -35,7 +35,7 @@ Do not treat “no credentials found” as proof of complete coverage while a re
 
 1. Review Pending, Retrying, Failed, and Skipped Notification Deliveries.
 2. Correct invalid receivers or dispatcher connections.
-3. Check provider history before moving Failed to Retrying.
+3. Check provider history before moving Failed to Retrying. Digest failures affect the receiver batch, so retry the intended rows together.
 4. Keep dispatchers disabled when DLP does not permit them.
 
 ## Renewal steps
@@ -78,7 +78,7 @@ Coverage failures are visible and remediated, unresolved responsibility reaches 
 - **In Renewal still generated a notice:** set Suppressed Until; status alone does not pause queueing.
 - **A stale notice sent after renewal:** existing queue records were not changed to Skipped.
 - **A corrected rule did not reassign:** clear the current Notification Group before resolving.
-- **A retry may duplicate delivery:** check the provider history first; dispatch uses at-least-once semantics.
+- **A retry may duplicate a digest:** check provider history first and retry the intended receiver batch together; dispatch uses at-least-once semantics.
 - **No run-level record exists:** use flow history, Coverage Gaps, and Renewal Events; complete Discovery Run writes are not implemented.
 
 ## Technical reference

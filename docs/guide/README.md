@@ -2,7 +2,7 @@
 
 **Guide version:** 1.0
 
-**Applies to:** CLMTables 1.3.1.0, clmPlatformOps 1.1.0.0, CLMDiscoveryFlow 1.1.0.2, CLMNotifications 1.3.0.0, CLMNotificationDispatchers 1.0.0.0, and CLMApp 1.1.0.0
+**Applies to:** CLMTables 1.3.1.0, clmPlatformOps 1.1.0.0, CLMDiscoveryFlow 1.1.0.2, CLMNotifications 1.3.0.0, CLMNotificationDispatchers 1.1.0.0, and CLMApp 1.1.0.0
 
 Use this guide if you want to deploy Credential Lifecycle Manager (CLM), route credentials to accountable teams, send reminders, or operate CLM day to day.
 
@@ -47,7 +47,7 @@ This establishes safe fallback routing first. Add [owner mappings and rules](OWN
 - Records discovery failures as Coverage Gaps.
 - Resolves one Notification Group through mappings, discovered owners, rules, then default triage.
 - Queues auditable, deduplicated email and Teams deliveries.
-- Optionally dispatches queued messages where Power Platform DLP permits it. Teams messages require the Teams Workflows (Power Automate) app and Flow bot to be enabled and allowed.
+- Optionally dispatches twice-daily receiver digests while retaining one audit row per queued delivery. Teams messages require the Teams Workflows (Power Automate) app and Flow bot to be enabled and allowed.
 
 CLM does not currently populate owners for Enterprise Application credentials or create complete Discovery Run audit records.
 
